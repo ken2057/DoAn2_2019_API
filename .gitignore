@@ -1,1 +1,6 @@
 /Lib
+/bin
+/lib64
+/share
+/temp
+/src/__pycache__

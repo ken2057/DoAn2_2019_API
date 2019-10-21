@@ -1,9 +1,12 @@
 from pymongo import MongoClient
-
-#mongoDB connection string
+# -----------------------------------------------------------------------------
+# mongoDB connection string
 mongodb = 'mongodb+srv://libary:ecyfAnTIz058VdrP@cluster0-uuoo5.gcp.mongodb.net/test?retryWrites=true&w=majority'
 client = MongoClient(mongodb)
 db = client.library
 
-#token
+# token
 tokenExpireTime = 300 #seconds
+
+# limit books per find
+limitBooks = 20

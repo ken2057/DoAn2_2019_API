@@ -1,8 +1,7 @@
-from src.configs import db
-
-if True:
-    # client.drop_database('library')
-    print(db.bookTitle.find_one({'_id': int('1')}))
+from configs import db, client
+# -----------------------------------------------------------------------------
+if False:
+    client.drop_database('library')
 else:
     if db.list_collection_names() == []:
         # account
@@ -18,12 +17,39 @@ else:
         # Author
         try:
             db.bookTitle.insert_many([
-                {'_id': 1, 'name': 'Hello world', 'author': 'David', 'price': 200000},
-                {'_id': 2, 'name': 'Angular', 'author': 'Jacky', 'price': 250000},
-                {'_id': 3, 'name': 'Python', 'author': 'Mao', 'price': 500000},
-                {'_id': 4, 'name': 'Erlang', 'author': 'Env', 'price': 25000},
-                {'_id': 5, 'name': 'Internship', 'author': 'Jame', 'price': 150000},
-                {'_id': 6, 'name': 'Machine Learning', 'author': 'Rock', 'price': 300000},
+                {
+                    '_id': 1, 
+                    'name': 'Hello world', 
+                    'author': 'David', 
+                    'subject': ['ab', 'cd'],
+                    'books': [
+                        { 'id_borrow': '' },
+                        { 'id_borrow': '' },
+                        { 'id_borrow': '' }
+                    ]
+                },
+                {
+                    '_id': 2, 
+                    'name': 'Angular', 
+                    'author': 'Jacky', 
+                    'subject': ['cd'],
+                    'books': [
+                        { 'id_borrow': '' }
+                    ]
+                },
+                {
+                    '_id': 3, 
+                    'name': 'Python', 
+                    'author': 'Mao', 
+                    'subject': ['ab'],
+                    'books': [
+                        { 'id_borrow': '' },
+                        { 'id_borrow': '' }
+                    ]
+                },
+                {'_id': 4, 'name': 'Erlang', 'subject': ['a'],'author': 'Env', 'books': []},
+                {'_id': 5, 'name': 'Internship', 'author': 'Jame', 'books': []},
+                {'_id': 6, 'name': 'Machine Learning', 'author': 'Rock', 'books': []},
             ])
         except Exception as e:
             print(e)
