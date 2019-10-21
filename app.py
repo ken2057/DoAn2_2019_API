@@ -12,7 +12,7 @@ from src.admin import GetUsersInfo
 # -----------------------------------------------------------------------------
 app = Flask(__name__)
 #for develop
-app.debug = True
+app.debug = False
 api = Api(app)
 CORS(app)
 
