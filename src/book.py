@@ -29,10 +29,31 @@ class GetBooks(Resource):
 			books.append(book)
 		return {'books': books}, 200
 
-## Get books with name
-class GetBooksWithName(Resource):
+class GetSearchBook(Resource):
 	def get(self):
-		name = request.args['name']
+		search = []
+
+		try:
+			name = request.args['name']
+			if name != '':
+				search.append({'name': re.compile(name, re.IGNORECASE)})
+		except:
+			pass
+
+		try:
+			subject = request.args['subject']
+			if subject != '':
+				search.append({'subjects': re.compile(subject, re.IGNORECASE)})
+		except:
+			pass
+
+		try:
+			author = request.args['author']
+			if author != '':
+				search.append({'author': re.compile(author, re.IGNORECASE)})
+		except:
+			pass
+
 		# check int
 		try:
 			page = int(request.args['page'])
@@ -41,48 +62,8 @@ class GetBooksWithName(Resource):
 
 		books = []
 		# pymongo query
-		regex = re.compile(name, re.IGNORECASE)
-		find = {'name': regex}
+		find = { '$and': search}
 
 		for book in db.bookTitle.find(find).skip(limitBooks * page).limit(limitBooks):
 			books.append(book)
 		return {'books': books}, 200
-
-## Get books with subject
-class GetBooksWithSubject(Resource):
-	def get(self):
-		subject = request.args['subject']
-		# check int
-		try:
-			page = int(request.args['page'])
-		except:
-			page = 0
-
-		books = []
-		# pymongo query
-		regex = re.compile(subject, re.IGNORECASE)
-		find = {'subjects': regex}
-
-		for book in db.bookTitle.find(find).skip(limitBooks * page).limit(limitBooks):
-			books.append(book)
-		return {'books': books}, 200
-
-## Get books with author
-class GetBooksWithAuthor(Resource):
-	def get(self):
-		author = request.args['author']
-		# check int
-		try:
-			page = int(request.args['page'])
-		except:
-			page = 0
-
-		books = []
-		# pymongo query
-		regex = re.compile(author, re.IGNORECASE)
-		find = {'author': regex}
-
-		for book in db.bookTitle.find(find).skip(limitBooks * page).limit(limitBooks):
-			books.append(book)
-		return {'books': books}, 200
-
