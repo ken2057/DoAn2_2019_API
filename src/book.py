@@ -18,7 +18,11 @@ class GetBook(Resource):
 ## Get books 
 class GetBooks(Resource):
 	def get(self):
-		page = request.args['page']
+		# check int
+		try:
+			page = int(request.args['page'])
+		except:
+			page = 0
 
 		books = []
 		for book in db.bookTitle.find().skip(limitBooks * page).limit(limitBooks):
@@ -29,7 +33,11 @@ class GetBooks(Resource):
 class GetBooksWithName(Resource):
 	def get(self):
 		name = request.args['name']
-		page = request.args['page']
+		# check int
+		try:
+			page = int(request.args['page'])
+		except:
+			page = 0
 
 		books = []
 		# pymongo query
@@ -44,7 +52,11 @@ class GetBooksWithName(Resource):
 class GetBooksWithSubject(Resource):
 	def get(self):
 		subject = request.args['subject']
-		page = request.args['page']
+		# check int
+		try:
+			page = int(request.args['page'])
+		except:
+			page = 0
 
 		books = []
 		# pymongo query
@@ -59,7 +71,11 @@ class GetBooksWithSubject(Resource):
 class GetBooksWithAuthor(Resource):
 	def get(self):
 		author = request.args['author']
-		page = request.args['page']
+		# check int
+		try:
+			page = int(request.args['page'])
+		except:
+			page = 0
 
 		books = []
 		# pymongo query
