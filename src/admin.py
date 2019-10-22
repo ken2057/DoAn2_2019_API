@@ -9,15 +9,9 @@ from src.utils import isJsonValid, getToken
 # -----------------------------------------------------------------------------
 
 class GetUsersInfo(Resource):
-	def post(self):
+	def get(self):
 		try:
-			json = request.get_json()
-			valid = ['token']
-			# invalid json
-			if not isJsonValid(valid, json):
-				return 'json invalid', 400
-			# get token info
-			token = getToken(json['token'])
+			token = getToken(request.args['token'])
 			# token expired or not admin
 			if token == None or token['role'] != role[0]:
 				return '', 403

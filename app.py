@@ -19,16 +19,16 @@ CORS(app)
 # for develop
 logging.basicConfig(level = logging.INFO)
 # book
-api.add_resource(GetBook, "/GetBook/<int:bookId>")
-api.add_resource(GetBooks, "/GetBooks/<int:page>")
-api.add_resource(GetBooksWithName, "/GetBooksName/<string:name>/<int:page>")
-api.add_resource(GetBooksWithSubject, "/GetBooksSubject/<string:subject>/<int:page>")
-api.add_resource(GetBooksWithAuthor, "/GetBooksAuthor/<string:author>/<int:page>")
+api.add_resource(GetBook, "/GetBook")
+api.add_resource(GetBooks, "/GetBooks")
+api.add_resource(GetBooksWithName, "/GetBooksName")
+api.add_resource(GetBooksWithSubject, "/GetBooksSubject")
+api.add_resource(GetBooksWithAuthor, "/GetBooksAuthor")
 
 # auth
 api.add_resource(Login, "/Login")
 api.add_resource(SignUp, "/SignUp")
-api.add_resource(GetPermission, "/Permission/<string:token>")
+api.add_resource(GetPermission, "/Permission")
 
 # admin
 api.add_resource(GetUsersInfo, "/Admin/GetUsers")

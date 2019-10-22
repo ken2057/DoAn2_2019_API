@@ -12,4 +12,5 @@ tokenExpireTime = 300 #seconds
 limitBooks = 20
 
 # role in db
+#       0        1          2
 role = ['admin', 'manager', 'user']

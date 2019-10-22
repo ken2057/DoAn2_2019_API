@@ -7,12 +7,19 @@ from src.utils import isJsonValid, getToken
 # -----------------------------------------------------------------------------
 ## Get book
 class GetBook(Resource):
-	def get(self, bookId):
-		return db.bookTitle.find_one({'_id': bookId}), 200
+	def get(self):
+		bookId = request.args['bookId']
+		try:
+			return db.bookTitle.find_one({'_id': int(bookId)}), 200
+		except Exception as e:
+			print('error getbook: ', e)
+		return '', 400
 
 ## Get books 
 class GetBooks(Resource):
-	def get(self, page):
+	def get(self):
+		page = request.args['page']
+
 		books = []
 		for book in db.bookTitle.find().skip(limitBooks * page).limit(limitBooks):
 			books.append(book)
@@ -20,7 +27,10 @@ class GetBooks(Resource):
 
 ## Get books with name
 class GetBooksWithName(Resource):
-	def get(self, name, page):
+	def get(self):
+		name = request.args['name']
+		page = request.args['page']
+
 		books = []
 		# pymongo query
 		regex = re.compile(name, re.IGNORECASE)
@@ -32,7 +42,10 @@ class GetBooksWithName(Resource):
 
 ## Get books with subject
 class GetBooksWithSubject(Resource):
-	def get(self, subject, page):
+	def get(self):
+		subject = request.args['subject']
+		page = request.args['page']
+
 		books = []
 		# pymongo query
 		regex = re.compile(subject, re.IGNORECASE)
@@ -44,7 +57,10 @@ class GetBooksWithSubject(Resource):
 
 ## Get books with author
 class GetBooksWithAuthor(Resource):
-	def get(self, author, page):
+	def get(self):
+		author = request.args['author']
+		page = request.args['page']
+
 		books = []
 		# pymongo query
 		regex = re.compile(author, re.IGNORECASE)

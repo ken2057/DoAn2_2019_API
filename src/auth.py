@@ -24,15 +24,12 @@ class Login(Resource):
 		)
 		return token
 
-	def post(self):
+	def get(self):
 		try:
-			json = request.get_json()
-			valid = ['username', 'password']
-			# invalid json
-			if not (isJsonValid(valid, json)):
-				return '', 400
-			# run
-			account = self.findUser(json['username'], json['password'])
+			username = request.args['username']
+			password = request.args['password']
+
+			account = self.findUser(username, password)
 			if(account != None):
 				token = self.createToken(account)
 				return { 'token': token, 'expires': tokenExpireTime }, 200
@@ -45,22 +42,16 @@ class Login(Resource):
 class SignUp(Resource):
 	def post(self):
 		try:
-			json = request.get_json()
-			valid = ['username', 'password', 'email']
-			# check json valid
-			if not isJsonValid(valid, json):
-				logging.debug('error signup - json invalid')
-				return 'json invalid', 400
-			# find does that username is exists?
-			if not isUserExist(json['username']):
-				logging.debug('error signup - username exists')
-				return 'exist', 400
+			username = request.args['username']
+			password = request.args['password']
+			email = request.args['email']
+
 			# create new account
 			db.account.insert_one(
 				{
-					'_id': json['username'], 
-					'password': json['password'], 
-					'email': json['email'], 
+					'_id': username, 
+					'password': password, 
+					'email': email, 
 					'role': 'user', 
 					'borrowed': [] 
 				}
@@ -72,9 +63,11 @@ class SignUp(Resource):
 		return '', 400
 
 class GetPermission(Resource):
-	def get(self, token):
+	def get(self):
 		try:
+			token = request.args['token']
 			cache = db.token.find_one({'_id' : token })
+
 			if cache != None:
 				return role.index(cache['role']), 200
 			return len(role), 200
