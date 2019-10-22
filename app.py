@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_cors import CORS
 import logging
 # -----------------------------------------------------------------------------
-from src.book import GetBook, GetBooks, GetSearchBook
+from src.book import GetBook, GetSearchBook
 
 from src.auth import Login, SignUp, GetPermission
 from src.admin import GetUsersInfo
@@ -18,7 +18,6 @@ CORS(app)
 logging.basicConfig(level = logging.INFO)
 # book
 api.add_resource(GetBook, "/GetBook")
-api.add_resource(GetBooks, "/GetBooks")
 api.add_resource(GetSearchBook, "/GetSearchBook")
 
 # auth

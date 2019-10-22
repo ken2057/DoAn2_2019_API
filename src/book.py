@@ -15,20 +15,6 @@ class GetBook(Resource):
 			print('error getbook: ', e)
 		return '', 400
 
-## Get books 
-class GetBooks(Resource):
-	def get(self):
-		# check int
-		try:
-			page = int(request.args['page'])
-		except:
-			page = 0
-
-		books = []
-		for book in db.bookTitle.find().skip(limitBooks * page).limit(limitBooks):
-			books.append(book)
-		return {'books': books}, 200
-
 class GetSearchBook(Resource):
 	def get(self):
 		search = []
@@ -64,6 +50,13 @@ class GetSearchBook(Resource):
 		# pymongo query
 		find = { '$and': search}
 
-		for book in db.bookTitle.find(find).skip(limitBooks * page).limit(limitBooks):
-			books.append(book)
+
+		if search != []:
+			for book in db.bookTitle.find(find).skip(limitBooks * page).limit(limitBooks):
+				books.append(book)
+		else:
+			# find all
+			for book in db.bookTitle.find().skip(limitBooks * page).limit(limitBooks):
+				books.append(book)
+
 		return {'books': books}, 200
