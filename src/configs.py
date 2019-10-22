@@ -10,3 +10,6 @@ tokenExpireTime = 300 #seconds
 
 # limit books per find
 limitBooks = 20
+
+# role in db
+role = ['admin', 'manager', 'user']

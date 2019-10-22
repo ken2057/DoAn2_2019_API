@@ -4,7 +4,7 @@ from flask import request
 from uuid import uuid4
 import logging
 # -----------------------------------------------------------------------------
-from src.configs import db, tokenExpireTime
+from src.configs import db, tokenExpireTime, role
 from src.utils import isJsonValid, isUserExist, calcTokenExprieTime
 # -----------------------------------------------------------------------------
 ## Login and return token
@@ -71,3 +71,12 @@ class SignUp(Resource):
 			logging.info('error signup: %s',e)
 		return '', 400
 
+class GetPermission(Resource):
+	def get(self, token):
+		try:
+			cache = db.token.find_one({'_id' : token })
+			if cache != None:
+				return role.index(cache['role']), 200
+			return len(role), 200
+		except Exception as e:
+			logging.info('error GetPermission: %s', e)

@@ -7,12 +7,12 @@ from src.book import GetBook, GetBooks
 from src.book import GetBooksWithName, GetBooksWithSubject
 from src.book import GetBooksWithAuthor
 
-from src.auth import Login, SignUp
+from src.auth import Login, SignUp, GetPermission
 from src.admin import GetUsersInfo
 # -----------------------------------------------------------------------------
 app = Flask(__name__)
 # for develop
-app.debug = False
+app.debug = True
 api = Api(app)
 CORS(app)
 
@@ -28,6 +28,8 @@ api.add_resource(GetBooksWithAuthor, "/GetBooksAuthor/<string:author>/<int:page>
 # auth
 api.add_resource(Login, "/Login")
 api.add_resource(SignUp, "/SignUp")
+api.add_resource(GetPermission, "/Permission/<string:token>")
+
 # admin
 api.add_resource(GetUsersInfo, "/Admin/GetUsers")
 

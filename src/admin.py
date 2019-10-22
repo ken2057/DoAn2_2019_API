@@ -4,7 +4,7 @@ from flask import request
 from uuid import uuid4
 import logging
 # -----------------------------------------------------------------------------
-from src.configs import db
+from src.configs import db, role
 from src.utils import isJsonValid, getToken
 # -----------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ class GetUsersInfo(Resource):
 			# get token info
 			token = getToken(json['token'])
 			# token expired or not admin
-			if token == None or token['role'] != 'admin':
+			if token == None or token['role'] != role[0]:
 				return '', 403
 			# get all user info
 			users = []
