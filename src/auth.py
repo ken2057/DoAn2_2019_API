@@ -45,8 +45,7 @@ class SignUp(Resource):
 			# username = request.args['username']
 			# password = request.args['password']
 			# email = request.args['email']
-			json = request.json
-			logging.info('error signup: %s', json)
+			json = request.json['user']
 
 			# create new account
 			db.account.insert_one(
