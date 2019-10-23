@@ -5,7 +5,7 @@ import logging
 # -----------------------------------------------------------------------------
 from src.book import GetBook, GetSearchBook
 
-from src.auth import Login, SignUp, GetPermission
+from src.auth import Login, SignUp, GetPermission, IsTokenExpire
 from src.admin import GetUsersInfo
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
@@ -24,6 +24,7 @@ api.add_resource(GetSearchBook, "/GetSearchBook")
 api.add_resource(Login, "/Login")
 api.add_resource(SignUp, "/SignUp")
 api.add_resource(GetPermission, "/Permission")
+api.add_resource(IsTokenExpire, "/CheckToken")
 
 # admin
 api.add_resource(GetUsersInfo, "/Admin/GetUsers")

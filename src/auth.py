@@ -5,7 +5,7 @@ from uuid import uuid4
 import logging
 # -----------------------------------------------------------------------------
 from src.configs import db, tokenExpireTime, role
-from src.utils import isJsonValid, isUserExist, calcTokenExprieTime
+from src.utils import isJsonValid, isUserExist, calcTokenExprieTime, getToken
 # -----------------------------------------------------------------------------
 ## Login and return token
 class Login(Resource):
@@ -74,3 +74,15 @@ class GetPermission(Resource):
 			return len(role), 200
 		except Exception as e:
 			logging.info('error GetPermission: %s', e)
+
+class IsTokenExpire(Resource):
+	def get(self):
+		try:
+			token = getToken(request.args['token'])
+			if token == None:
+				return '', 203
+				
+			return {'username': token['username'], 'expires': tokenExpireTime}, 200
+
+		except Exception as e:
+			logging.info('error checkToken: %s', e)

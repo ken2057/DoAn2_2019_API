@@ -10,9 +10,9 @@ else:
         # account
         try:
             db.account.insert_many([
-                {'_id': 'duy', 'password': '123', 'role': 'admin', 'borrowed': []},
-                {'_id': 'bui', 'password': '123', 'role': 'manager', 'borrowed': []},
-                {'_id': 'hieu', 'password': '123', 'role': 'manager', 'borrowed': []},
+                {'_id': 'duy', 'password': '40bd001563085fc35165329ea1ff5c5ecbdbbeef', 'role': 'admin', 'borrowed': []},
+                {'_id': 'bui', 'password': '40bd001563085fc35165329ea1ff5c5ecbdbbeef', 'role': 'manager', 'borrowed': []},
+                {'_id': 'hieu', 'password': '40bd001563085fc35165329ea1ff5c5ecbdbbeef', 'role': 'manager', 'borrowed': []},
             ])
         except Exception as e:
             print(e)
