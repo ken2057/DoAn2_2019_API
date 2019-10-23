@@ -42,16 +42,18 @@ class Login(Resource):
 class SignUp(Resource):
 	def post(self):
 		try:
-			username = request.args['username']
-			password = request.args['password']
-			email = request.args['email']
+			# username = request.args['username']
+			# password = request.args['password']
+			# email = request.args['email']
+			json = request.json
+			logging.info('error signup: %s', json)
 
 			# create new account
 			db.account.insert_one(
 				{
-					'_id': username, 
-					'password': password, 
-					'email': email, 
+					'_id': json['username'], 
+					'password': json['password'], 
+					'email': json['email'], 
 					'role': 'user', 
 					'borrowed': [] 
 				}

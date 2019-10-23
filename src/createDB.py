@@ -1,8 +1,11 @@
 from configs import db, client
 # -----------------------------------------------------------------------------
-if False:
-    client.drop_database('library')
+if True:
+    for i in db.account.find():
+        print(i)
 else:
+    client.drop_database('library')
+
     if db.list_collection_names() == []:
         # account
         try:
