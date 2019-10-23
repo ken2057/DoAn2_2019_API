@@ -47,6 +47,9 @@ class SignUp(Resource):
 			# email = request.args['email']
 			json = request.json['user']
 
+			if db.account.find_one({'_id': json['username']}) != None:
+				return '', 409
+
 			# create new account
 			db.account.insert_one(
 				{
