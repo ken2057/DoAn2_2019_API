@@ -42,9 +42,6 @@ class Login(Resource):
 class SignUp(Resource):
 	def post(self):
 		try:
-			# username = request.args['username']
-			# password = request.args['password']
-			# email = request.args['email']
 			json = request.json['user']
 
 			if db.account.find_one({'_id': json['username']}) != None:
