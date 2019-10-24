@@ -5,12 +5,27 @@ mongodb = 'mongodb+srv://libary:ecyfAnTIz058VdrP@cluster0-uuoo5.gcp.mongodb.net/
 client = MongoClient(mongodb)
 db = client.library
 
-# token
-tokenExpireTime = 300 #seconds
+# token expire time
+tokenExpireTime = 1000000000 #seconds
+
+# book dates much return
+maxDateBorrow = 7
 
 # limit books per find
 limitBooks = 20
 
+# limit history per find
+limitBorrow = 20
+
 # role in db
 #       0        1          2
 role = ['admin', 'manager', 'user']
+roleHigherThanUser = ['admin', 'manager']
+
+# status of borrow
+statusBorrow = {
+    'return' : 'Returned',
+    'start': 'On borrowing',
+    'order': 'Watting for avaialbe',
+    'lost': 'Lost'
+}

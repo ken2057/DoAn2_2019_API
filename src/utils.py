@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from src.configs import db, tokenExpireTime
+from src.configs import db, tokenExpireTime, maxDateBorrow
 # -----------------------------------------------------------------------------
 ## Check json from post method is enought field require for that func
 def isJsonValid(valid, json):
@@ -31,3 +31,26 @@ def isUserExist(id):
 def calcTokenExprieTime():
 	# expires time = now + second
 	return datetime.now() + timedelta(seconds = tokenExpireTime)
+
+def calcBorrowExpireTime(now):
+	return now + timedelta(days = maxDateBorrow)
+
+# convert python datetime.datetime to str for json serializable
+# input will be dict
+def convertDateForSeria(json):
+	for key in json:
+		if isinstance(json[key], datetime):
+			json[key] = json[key].__str__()
+	return json
+
+# ------------------------------------------------------------------------------
+# Get data from db
+# ------------------------------------------------------------------------------
+
+## Get account with id
+def getAccountWithId(accountId):
+	return db.account.find_one({'_id':accountId})
+
+## Get book with id
+def getBookWithId(bookId):
+	return db.bookTitle.find_one({'_id':bookId})

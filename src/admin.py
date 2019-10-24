@@ -5,7 +5,7 @@ from uuid import uuid4
 import logging
 # -----------------------------------------------------------------------------
 from src.configs import db, role
-from src.utils import isJsonValid, getToken
+from src.utils import isJsonValid, getToken, getAccountWithId
 # -----------------------------------------------------------------------------
 
 class GetUsersInfo(Resource):
@@ -32,4 +32,29 @@ class GetUsersInfo(Resource):
 				
 		except Exception as e:
 			logging.info('error GetAllUserInfo: %s',e)
+		return '', 400
+
+class SetAccountRole(Resource):
+	def post(self):
+		try:
+			json = request.get_json()
+			# valid = ['token', 'accountId', 'role']
+
+			# get token check is admin
+			token = getToken(json['token'])
+			# token is not admin or if new role not exist => false
+			if not token['role'] == 'admin' or json['role'] not in role or json['role'] == 'admin':
+				raise Exception('Invalid json/token: %s', json)
+			
+			# check account exists => return false
+			account = getAccountWithId(json['accountId'])
+			# account is admin ? => return false
+			if account['role'] == 'admin':
+				raise Exception("Account is admin, can't change")
+			
+			# update role
+			db.account.update_one({'_id': json['accountId']}, { '$set': {'role': json['role']}})
+
+		except Exception as e:
+			logging.info('error setAccountRole: %s', e)
 		return '', 400
