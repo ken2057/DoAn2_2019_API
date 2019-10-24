@@ -3,11 +3,11 @@ from flask_restful import Api
 from flask_cors import CORS
 import logging
 # -----------------------------------------------------------------------------
-from src.book import *
-from src.auth import *
-from src.admin import *
-from src.manager import *
-from src.account import *
+from src.book import GetBook, GetSearchBook, BorrowBook, ReturnBook
+from src.auth import GetPermission, IsTokenExpire
+from src.admin import GetUsersInfo, SetAccountRole
+from src.manager import GetBorrowed
+from src.account import Login, SignUp, GetUserBorrowed
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
 # for develop

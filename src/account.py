@@ -1,10 +1,8 @@
-from datetime import datetime, timedelta
-from flask_restful import Resource
-from flask import request
+# all the same import of api will be here
+from src.package import *
 from uuid import uuid4
-import logging
 # -----------------------------------------------------------------------------
-from src.configs import db, tokenExpireTime, role
+from src.configs import tokenExpireTime, role
 from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria
 # -----------------------------------------------------------------------------
 
@@ -34,11 +32,11 @@ class Login(Resource):
 			if(account != None):
 				token = self.createToken(account)
 				return { 'token': token, 'expires': tokenExpireTime }, 200
-			return 401, 401
+			return 'Wrong username/password', 401
 			
 		except Exception as e:
 			logging.info('error login: %s',e)
-		return '', 400
+		return 'Invalid', 400
 
 class SignUp(Resource):
 	def post(self):
@@ -62,7 +60,7 @@ class SignUp(Resource):
 
 		except Exception as e:
 			logging.info('error signup: %s',e)
-		return '', 400
+		return 'Invalid', 400
 
 class GetUserBorrowed(Resource):
 	def get(self):
@@ -80,4 +78,4 @@ class GetUserBorrowed(Resource):
 
 		except Exception as e:	
 			logging.info('error getBorrowed: %s',e)
-		return '', 400
+		return 'Invalid', 400

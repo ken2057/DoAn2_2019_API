@@ -1,9 +1,8 @@
-from flask_restful import Resource
-from flask import request
-from datetime import datetime, timedelta
-import logging, re
+# all the same import of api will be here
+from src.package import *
+import re
 # -----------------------------------------------------------------------------
-from src.configs import db, limitBooks, statusBorrow
+from src.configs import limitBooks, statusBorrow
 from src.utils import isJsonValid, getToken, calcBorrowExpireTime
 from src.utils import getAccountWithId, getBookWithId
 # -----------------------------------------------------------------------------
@@ -15,7 +14,7 @@ class GetBook(Resource):
 			return getBookWithId(bookId), 200
 		except Exception as e:
 			print('error getbook: ', e)
-		return '', 400
+		return 'Invalid', 400
 
 class GetSearchBook(Resource):
 	def get(self):
@@ -66,7 +65,7 @@ class GetSearchBook(Resource):
 			return {'books': books}, 200
 		except Exception as e:
 			logging.info('error searchBook: %s', e)
-		return '', 400
+		return 'Invalid', 400
 
 class BorrowBook(Resource):
 	# check can borrow book or not
@@ -79,7 +78,7 @@ class BorrowBook(Resource):
 			return flag, 200
 		except Exception as e:
 			logging.info('error get borrowBook: %s', e)
-		return '', 400
+		return 'Invalid', 400
 
 	# update book borrow
 	def post(self):
@@ -91,6 +90,13 @@ class BorrowBook(Resource):
 			# get account, book from db
 			account = getAccountWithId(token['username'])
 			book = getBookWithId(int(json['bookId']))
+			# if user already borrow this book, he/she can't borrow the second
+			if token['username'] in book['books']:
+				return "Can't borrow 2 same book", 400
+			# if book not avaiable
+			if '' not in book['books']:
+				return 'Out of order', 400
+
 			# some varibles
 			now = datetime.now()
 			borrowInfo = {
@@ -117,7 +123,7 @@ class BorrowBook(Resource):
 
 		except Exception as e:
 			logging.info('error post orderBook: %s', e)
-		return '', 400
+		return 'Invalid', 400
 
 class ReturnBook(Resource):
 	def post(self):
@@ -146,7 +152,8 @@ class ReturnBook(Resource):
 				book['books'][index] = ''
 			else:
 				# if user lost the book
-				book['books'].remove(token['username'])
+				# book['books'].remove(token['username'])
+				book['books'][index] = 'Lost by ' + token['username'] +' - Date: '+ datetime.now().__str__()
 			
 			#
 			# update borrowed info
@@ -167,3 +174,4 @@ class ReturnBook(Resource):
 
 		except Exception as e:
 			logging.info('error returnBook: %s', e)
+		return 'Invalid', 400

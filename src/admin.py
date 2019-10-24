@@ -1,10 +1,7 @@
-from datetime import datetime, timedelta
-from flask_restful import Resource
-from flask import request
-from uuid import uuid4
-import logging
+# all the same import of api will be here
+from src.package import *
 # -----------------------------------------------------------------------------
-from src.configs import db, role
+from src.configs import role
 from src.utils import isJsonValid, getToken, getAccountWithId
 # -----------------------------------------------------------------------------
 
@@ -32,7 +29,7 @@ class GetUsersInfo(Resource):
 				
 		except Exception as e:
 			logging.info('error GetAllUserInfo: %s',e)
-		return '', 400
+		return 'Invalid', 400
 
 class SetAccountRole(Resource):
 	def post(self):
@@ -57,4 +54,4 @@ class SetAccountRole(Resource):
 
 		except Exception as e:
 			logging.info('error setAccountRole: %s', e)
-		return '', 400
+		return 'Invalid', 400

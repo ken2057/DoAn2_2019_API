@@ -1,10 +1,7 @@
-from datetime import datetime, timedelta
-from flask_restful import Resource
-from flask import request
-from uuid import uuid4
-import logging
+# all the same import of api will be here
+from src.package import *
 # -----------------------------------------------------------------------------
-from src.configs import db, tokenExpireTime, role
+from src.configs import tokenExpireTime, role
 from src.utils import isJsonValid, isUserExist, calcTokenExprieTime, getToken
 # -----------------------------------------------------------------------------
 
@@ -19,6 +16,7 @@ class GetPermission(Resource):
 			return len(role), 200
 		except Exception as e:
 			logging.info('error GetPermission: %s', e)
+		return 'Invalid', 400
 
 class IsTokenExpire(Resource):
 	def get(self):
@@ -31,3 +29,4 @@ class IsTokenExpire(Resource):
 
 		except Exception as e:
 			logging.info('error checkToken: %s', e)
+		return 'Invalid', 400

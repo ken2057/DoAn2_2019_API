@@ -1,10 +1,7 @@
-from datetime import datetime, timedelta
-from flask_restful import Resource
-from flask import request
-from uuid import uuid4
-import logging
+# all the same import of api will be here
+from src.package import *
 # -----------------------------------------------------------------------------
-from src.configs import db, role, limitBorrow, roleHigherThanUser
+from src.configs import role, limitBorrow, roleHigherThanUser
 from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSeria
 # -----------------------------------------------------------------------------
 
@@ -31,4 +28,4 @@ class GetBorrowed(Resource):
 
         except Exception as e:
             logging.info('error getBorrowed: %s', e)
-        return '', 400
+        return 'Invalid', 400
