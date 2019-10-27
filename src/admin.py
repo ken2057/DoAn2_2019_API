@@ -2,7 +2,7 @@
 from src.package import *
 # -----------------------------------------------------------------------------
 from src.configs import role
-from src.utils import isJsonValid, getToken, getAccountWithId
+from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSeria
 # -----------------------------------------------------------------------------
 
 class GetUsersInfo(Resource):
@@ -17,12 +17,17 @@ class GetUsersInfo(Resource):
 			for user in db.account.find():
 				if 'email' not in user:
 					user['email'] = ''
+				# convert datetime into json
+				borrowed = []
+				for b in user['borrowed']:
+					borrowed.append(convertDateForSeria(b))
+
 				users.append(
 					{
 						'username': user['_id'],
 						'email': user['email'],
 						'role': user['role'],
-						'borrowed': user['borrowed']
+						'borrowed': b
 					}
 				)
 			return {'users': users}, 200
