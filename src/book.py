@@ -84,7 +84,7 @@ class BorrowBook(Resource):
 	def post(self):
 		try:
 			# json will have token + bookId
-			json = request.get_json()
+			json = request.get_json()['json']
 			token = getToken(json['token'])
 			
 			# get account, book from db
@@ -129,7 +129,7 @@ class ReturnBook(Resource):
 	def post(self):
 		try:
 			# json will have token, bookId, status (return/lost)
-			json = request.get_json()
+			json = request.get_json()['json']
 			token = getToken(json['token'])
 
 			# get account, book from db

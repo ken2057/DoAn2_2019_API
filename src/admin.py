@@ -39,7 +39,7 @@ class GetUsersInfo(Resource):
 class SetAccountRole(Resource):
 	def post(self):
 		try:
-			json = request.get_json()
+			json = request.get_json()['json']
 			# valid = ['token', 'accountId', 'role']
 
 			# get token check is admin
