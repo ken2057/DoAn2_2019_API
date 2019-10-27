@@ -22,9 +22,6 @@ class IsTokenExpire(Resource):
 	def get(self):
 		try:
 			token = getToken(request.args['token'])
-			if token == None:
-				return '', 203
-				
 			return {'username': token['username'], 'expires': tokenExpireTime}, 200
 
 		except Exception as e:

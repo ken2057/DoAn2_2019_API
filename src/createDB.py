@@ -39,25 +39,28 @@ else:
                     'name': 'Hello world', 
                     'author': 'David', 
                     'subject': ['ab', 'cd'],
-                    'books': [ 'duy', '', '', '' ]
+                    'books': [ 'duy', '', '', '' ],
+                    'image': ''
                 },
                 {
                     '_id': 2, 
                     'name': 'Angular', 
                     'author': 'Jacky', 
                     'subject': ['cd'],
-                    'books': ['', '']
+                    'books': ['', ''],
+                    'image': ''
                 },
                 {
                     '_id': 3, 
                     'name': 'Python', 
                     'author': 'Mao', 
                     'subject': ['ab'],
-                    'books': ['']
+                    'books': [''],
+                    'image': ''
                 },
-                {'_id': 4, 'name': 'Erlang', 'subject': ['a'],'author': 'Env', 'books': []},
-                {'_id': 5, 'name': 'Internship', 'author': 'Jame', 'books': []},
-                {'_id': 6, 'name': 'Machine Learning', 'author': 'Rock', 'books': []},
+                {'_id': 4, 'name': 'Erlang', 'subject': ['a'],'author': 'Env', 'books': [], 'image': ''},
+                {'_id': 5, 'name': 'Internship', 'author': 'Jame', 'books': [], 'image': ''},
+                {'_id': 6, 'name': 'Machine Learning', 'author': 'Rock', 'books': [], 'image': ''},
             ])
 
         except Exception as e:
