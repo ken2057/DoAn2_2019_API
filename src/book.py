@@ -175,3 +175,18 @@ class ReturnBook(Resource):
 		except Exception as e:
 			logging.info('error returnBook: %s', e)
 		return 'Invalid', 400
+
+class IsBorrowedById(Resource):
+	def get(self):
+		try: 
+			book = getBookWithId(int(request.args['bookId']))
+			token = getToken(request.args['token'])
+
+			for info in book['books']:
+				if info == token['username']:
+					return {'borrowed': True}, 200
+			return {'borrowed': False}, 200
+
+		except Exception as e:
+			logging.info('error IsBorrowedById: %s', e)
+		return 'Invalid', 400

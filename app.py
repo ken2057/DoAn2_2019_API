@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_cors import CORS
 import logging
 # -----------------------------------------------------------------------------
-from src.book import GetBook, GetSearchBook, BorrowBook, ReturnBook
+from src.book import GetBook, GetSearchBook, BorrowBook, ReturnBook, IsBorrowedById
 from src.auth import GetPermission, IsTokenExpire
 from src.admin import GetUsersInfo, SetAccountRole
 from src.manager import GetBorrowed
@@ -25,6 +25,7 @@ api.add_resource(GetSearchBook, "/GetSearchBook") #get
   # get: check does that book still avaiable
 api.add_resource(BorrowBook, "/BorrowBook") # post/get
 api.add_resource(ReturnBook, "/ReturnBook") # post
+api.add_resource(IsBorrowedById, "/IsBorrowedById") # get
 
 # auth
 api.add_resource(GetPermission, "/Permission") # get
