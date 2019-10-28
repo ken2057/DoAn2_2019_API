@@ -91,6 +91,7 @@ class BorrowBook(Resource):
 			account = getAccountWithId(token['username'])
 			book = getBookWithId(int(json['bookId']))
 			# if user already borrow this book, he/she can't borrow the second
+			
 			if token['username'] in book['books']:
 				return "Can't borrow 2 same book", 400
 			# if book not avaiable
@@ -111,13 +112,13 @@ class BorrowBook(Resource):
 			# get index of book not borrowed
 			index = book['books'].index('')
 			book['books'][index] = token['username']
-
+			
 			#
 			# update db
 			#
 			db.account.update_one({'_id':token['username']}, { '$set': {'borrowed':account['borrowed']}})
 			db.borrowed.insert_one(borrowInfo)
-			db.bookTitle.update_one({'_id': json['bookId']}, { '$set': {'books': book['books']}})
+			db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}})
 
 			return 'done', 200
 
@@ -168,7 +169,7 @@ class ReturnBook(Resource):
 			#
 			db.account.update_one({'_id':token['username']}, { '$set': {'borrowed':account['borrowed']}})
 			db.borrowed.insert_one(borrowInfo)
-			db.bookTitle.update_one({'_id': json['bookId']}, { '$set': {'books': book['books']}})
+			db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}})
 
 			return 'done', 200
 

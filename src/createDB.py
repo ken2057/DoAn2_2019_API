@@ -38,7 +38,7 @@ else:
                     '_id': 1, 
                     'name': 'Hello world', 
                     'author': 'David', 
-                    'subject': ['ab', 'cd'],
+                    'subjects': ['ab', 'cd'],
                     'books': [ 'duy', '', '', '' ],
                     'image': ''
                 },
@@ -46,7 +46,7 @@ else:
                     '_id': 2, 
                     'name': 'Angular', 
                     'author': 'Jacky', 
-                    'subject': ['cd'],
+                    'subjects': ['cd'],
                     'books': ['', ''],
                     'image': ''
                 },
@@ -54,13 +54,13 @@ else:
                     '_id': 3, 
                     'name': 'Python', 
                     'author': 'Mao', 
-                    'subject': ['ab'],
+                    'subjects': ['ab'],
                     'books': [''],
                     'image': ''
                 },
-                {'_id': 4, 'name': 'Erlang', 'subject': ['a'],'author': 'Env', 'books': [], 'image': ''},
-                {'_id': 5, 'name': 'Internship', 'author': 'Jame', 'books': [], 'image': ''},
-                {'_id': 6, 'name': 'Machine Learning', 'author': 'Rock', 'books': [], 'image': ''},
+                {'_id': 4, 'name': 'Erlang', 'subjects': ['a'], 'author': 'Env', 'books': [], 'image': ''},
+                {'_id': 5, 'name': 'Internship', 'author': 'Jame', 'subjects': ['a'],'books': [], 'image': ''},
+                {'_id': 6, 'name': 'Machine Learning', 'author': 'Rock', 'subjects': ['a'],'books': [], 'image': ''},
             ])
 
         except Exception as e:
