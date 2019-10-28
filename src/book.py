@@ -13,7 +13,7 @@ class GetBook(Resource):
 		try:
 			return getBookWithId(bookId), 200
 		except Exception as e:
-			print('error getbook: ', e)
+			logging.info('error getbook: ', e)
 		return 'Invalid', 400
 
 class GetSearchBook(Resource):
@@ -102,7 +102,7 @@ class BorrowBook(Resource):
 			now = datetime.now()
 			borrowInfo = {
 				'username': token['username'],
-				'bookId': json['bookId'],
+				'bookId': int(json['bookId']),
 				'status': statusBorrow['start'],
 				'date_borrow': now,
 				'date_expire': calcBorrowExpireTime(now)
@@ -139,7 +139,7 @@ class ReturnBook(Resource):
 			# get borrowed info
 			borrowInfo = None
 			for info in account['borrowed']:
-				if info['bookId'] == json['bookId'] and info['status'] == statusBorrow['start']:
+				if info['bookId'] == int(json['bookId']) and info['status'] == statusBorrow['start']:
 					borrowInfo = info
 					break
 			index = book['books'].index(token['username'])
