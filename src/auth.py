@@ -13,7 +13,7 @@ class GetPermission(Resource):
 
 			if cache != None:
 				return role.index(cache['role']), 200
-			return len(role), 200
+			return {'role': len(role)}, 200
 		except Exception as e:
 			logging.info('error GetPermission: %s', e)
 		return 'Invalid', 400

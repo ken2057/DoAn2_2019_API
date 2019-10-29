@@ -116,7 +116,7 @@ class BorrowBook(Resource):
 			#
 			# update db
 			#
-			db.account.update_one({'_id':token['username']}, { '$set': {'borrowed':account['borrowed']}})
+			db.account.update_one({'_id':token['username']}, { '$set': {'borrowed': account['borrowed']}})
 			db.borrowed.insert_one(borrowInfo)
 			db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}})
 
