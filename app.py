@@ -6,7 +6,7 @@ import logging
 from src.book import GetBook, GetSearchBook, BorrowBook, ReturnBook, IsBorrowedById
 from src.auth import GetPermission, IsTokenExpire
 from src.admin import GetUsersInfo, SetAccountRole
-from src.manager import GetBorrowed
+from src.manager import GetBorrowed, DeleteBook, EditBook
 from src.account import Login, SignUp, GetUserBorrowed
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
@@ -42,6 +42,8 @@ api.add_resource(SetAccountRole, "/Admin/SetRole") # post
 
 # manager
 api.add_resource(GetBorrowed, "/Manager/GetBorrowed") # get
+api.add_resource(DeleteBook, "/Manager/DeleteBook") # post
+api.add_resource(EditBook, "/Manager/EditBook") # post
 
 if __name__ == "__main__":
   app.run()

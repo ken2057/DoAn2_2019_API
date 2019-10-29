@@ -54,3 +54,15 @@ def getAccountWithId(accountId):
 ## Get book with id
 def getBookWithId(bookId):
 	return db.bookTitle.find_one({'_id':bookId})
+
+# ------------------------------------------------------------------------------
+# Logging
+# ------------------------------------------------------------------------------
+def formatLog(token, action, note):
+	return {
+		'time': datetime.now(),
+		'username': token['username'], 
+		'role': token['role'], 
+		'action': action,
+		'note': note
+	}

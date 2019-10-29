@@ -40,7 +40,8 @@ else:
                     'author': 'David', 
                     'subjects': ['ab', 'cd'],
                     'books': [ 'duy', '', '', '' ],
-                    'image': ''
+                    'image': '',
+                    'deleted': False
                 },
                 {
                     '_id': 2, 
@@ -48,7 +49,8 @@ else:
                     'author': 'Jacky', 
                     'subjects': ['cd'],
                     'books': ['', ''],
-                    'image': ''
+                    'image': '',
+                    'deleted': False
                 },
                 {
                     '_id': 3, 
@@ -56,11 +58,12 @@ else:
                     'author': 'Mao', 
                     'subjects': ['ab'],
                     'books': [''],
-                    'image': ''
+                    'image': '',
+                    'deleted': False
                 },
-                {'_id': 4, 'name': 'Erlang', 'subjects': ['a'], 'author': 'Env', 'books': [], 'image': ''},
-                {'_id': 5, 'name': 'Internship', 'author': 'Jame', 'subjects': ['a'],'books': [], 'image': ''},
-                {'_id': 6, 'name': 'Machine Learning', 'author': 'Rock', 'subjects': ['a'],'books': [], 'image': ''},
+                {'_id': 4, 'name': 'Erlang', 'subjects': ['a'], 'author': 'Env', 'books': [], 'image': '', 'deleted': False},
+                {'_id': 5, 'name': 'Internship', 'author': 'Jame', 'subjects': ['a'],'books': [], 'image': '', 'deleted': False},
+                {'_id': 6, 'name': 'Machine Learning', 'author': 'Rock', 'subjects': ['a'],'books': [], 'image': '', 'deleted': False},
             ])
 
         except Exception as e:
