@@ -12,7 +12,7 @@ class GetPermission(Resource):
 			cache = db.token.find_one({'_id' : token })
 
 			if cache != None:
-				return role.index(cache['role']), 200
+				return {'role': role.index(cache['role'])}, 200
 			return {'role': len(role)}, 200
 		except Exception as e:
 			logging.info('error GetPermission: %s', e)
