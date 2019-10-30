@@ -22,14 +22,14 @@ class GetUsersInfo(Resource):
 				for b in user['borrowed']:
 					borrowed.append(convertDateForSeria(b))
 
-				users.append(
-					{
-						'username': user['_id'],
-						'email': user['email'],
-						'role': user['role'],
-						'borrowed': b
-					}
-				)
+					users.append(
+						{
+							'username': user['_id'],
+							'email': user['email'],
+							'role': user['role'],
+							'borrowed': b
+						}
+					)
 			return {'users': users}, 200
 				
 		except Exception as e:
