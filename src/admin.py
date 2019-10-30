@@ -18,18 +18,9 @@ class GetUsersInfo(Resource):
 				if 'email' not in user:
 					user['email'] = ''
 				# convert datetime into json
-				borrowed = []
-				for b in user['borrowed']:
-					borrowed.append(convertDateForSeria(b))
-
-					users.append(
-						{
-							'username': user['_id'],
-							'email': user['email'],
-							'role': user['role'],
-							'borrowed': b
-						}
-					)
+				user['borrowed'] = convertDateForSeria(user['borrowed'])
+				user.pop('password')
+				users.append(user)
 			return {'users': users}, 200
 				
 		except Exception as e:
