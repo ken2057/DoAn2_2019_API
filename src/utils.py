@@ -37,11 +37,23 @@ def calcBorrowExpireTime(now):
 
 # convert python datetime.datetime to str for json serializable
 # input will be dict
-def convertDateForSeria(json):
+def convertDateForSeria(data):
+	# incase of input a list of borrow
+	if isinstance(data, list):
+		allBorrowed = []
+		for book in data:
+			book.pop('username')
+			allBorrowed.append(run_convertDateForSeria(book))
+		return allBorrowed
+	else:
+		return run_convertDateForSeria(data)
+	
+def run_convertDateForSeria(json):
 	for key in json:
 		if isinstance(json[key], datetime):
 			json[key] = json[key].__str__()
 	return json
+
 
 # ------------------------------------------------------------------------------
 # Get data from db

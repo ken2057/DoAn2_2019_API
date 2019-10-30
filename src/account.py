@@ -68,14 +68,47 @@ class GetUserBorrowed(Resource):
 			token = getToken(request.args['token'])
 			account = getAccountWithId(token['username'])
 
-			allBorrowed = []
-
-			for book in account['borrowed']:
-				book.pop('username')
-				allBorrowed.append(convertDateForSeria(book))
+			allBorrowed = convertDateForSeria(account['borrowed'])
 
 			return { 'borrowed': allBorrowed }, 200
 
 		except Exception as e:	
 			logging.info('error getBorrowed: %s',e)
 		return 'Invalid', 400
+
+class AccountInfo(Resource):
+	# get account info
+	def get(self):
+		try:
+			token = getToken(request.args['token'])
+			account = getAccountWithId(token['username'])
+
+			account.pop('password')
+			account.pop('role')
+			account['borrowed'] = convertDateForSeria(account['borrowed'])
+
+			return {'account': account}, 200
+
+		except Exception as e:
+			logging.info('error getAccountInfo: %s', e)
+		return 'Invalid', 400
+	
+	def post(self):
+		try:
+			json = request.json['json']
+			user = json['user']
+			token = getToken(json['token'])
+			# if not match username in token and user in
+			if user['username'] != token['username']:
+				raise Exception('Json and token username not match: %s', json)
+			# set
+			if user['password'] == '':
+				newInfo = {'email': user['email']}
+			else:
+				newInfo = {'email': user['email'], 'password': user['password']}
+			# update
+			db.account.update_one({'_id': json['username']}, {'$set': newInfo})
+			
+		except Exception as e:
+			logging.info('error postAccountinfo: %s', e)
+		return 'Inavlid', 400

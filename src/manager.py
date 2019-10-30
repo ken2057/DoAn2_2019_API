@@ -34,7 +34,7 @@ class EditBook(Resource):
 	def post(self):
 		try:
 			# json will have: token, Obj(book)
-			json = request.get_json()['jsons']
+			json = request.get_json()['json']
 			token = getToken(json['token'])
 			bookNew = json['book']
 			bookOld
@@ -65,7 +65,7 @@ class DeleteBook(Resource):
 	def post(self):
 		try:
 			# json will have: token, bookId
-			json = request.get_json()['jsons']
+			json = request.get_json()['json']
 			token = getToken(json['token'])
 			book = getBookWithId(json['bookId'])
 

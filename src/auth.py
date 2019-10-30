@@ -27,3 +27,18 @@ class IsTokenExpire(Resource):
 		except Exception as e:
 			logging.info('error checkToken: %s', e)
 		return 'Invalid', 400
+
+class Logout(Resource):
+	def post(self):
+		try:
+			json = request.json['json']
+			token = getToken(json['token'])
+
+			# remove token
+			db.token.delete_one({'_id': token['_id']})
+
+			return 'done', 200
+
+		except Exception as e:
+			logging.info('error logOut: %s', e)
+		return 'Invalid', 400

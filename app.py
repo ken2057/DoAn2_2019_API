@@ -4,10 +4,10 @@ from flask_cors import CORS
 import logging
 # -----------------------------------------------------------------------------
 from src.book import GetBook, GetSearchBook, BorrowBook, ReturnBook, IsBorrowedById
-from src.auth import GetPermission, IsTokenExpire
+from src.auth import GetPermission, IsTokenExpire, Logout
 from src.admin import GetUsersInfo, SetAccountRole
 from src.manager import GetBorrowed, DeleteBook, EditBook
-from src.account import Login, SignUp, GetUserBorrowed
+from src.account import Login, SignUp, GetUserBorrowed, AccountInfo
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
 # for develop
@@ -30,11 +30,15 @@ api.add_resource(IsBorrowedById, "/IsBorrowedById") # get
 # auth
 api.add_resource(GetPermission, "/Permission") # get
 api.add_resource(IsTokenExpire, "/CheckToken") # get
+api.add_resource(Logout, "/Logout") # post
 
 # account
 api.add_resource(Login, "/Login") # get
 api.add_resource(SignUp, "/SignUp") # post
 api.add_resource(GetUserBorrowed, "/User/GetBorrowed") # get
+  # get: get account info
+  # post: update account
+api.add_resource(AccountInfo, "/User/Info")
 
 # admin
 api.add_resource(GetUsersInfo, "/Admin/GetUsers") # get
