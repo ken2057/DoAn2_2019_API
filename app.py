@@ -35,7 +35,7 @@ api.add_resource(Logout, "/Logout") # post
 # account
 api.add_resource(Login, "/Login") # get
 api.add_resource(SignUp, "/SignUp") # post
-api.add_resource(GetUserBorrowed, "/User/GetBorrowed") # get
+api.add_resource(GetUserBorrowed, "/User/GetBorrowed") # get 
   # get: get account info
   # post: update account
 api.add_resource(AccountInfo, "/User/Info")
