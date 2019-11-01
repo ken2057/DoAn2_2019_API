@@ -65,7 +65,7 @@ def getAccountWithId(accountId):
 
 ## Get book with id
 def getBookWithId(bookId):
-	return db.bookTitle.find_one({'_id':bookId})
+	return db.bookTitle.find_one({'_id':bookId, 'deleted': False})
 
 # ------------------------------------------------------------------------------
 # Logging

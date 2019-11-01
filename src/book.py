@@ -49,7 +49,9 @@ class GetSearchBook(Resource):
 
 		books = []
 		# pymongo query
-		find = { '$and': search}
+		deleted = {'deleted': False}
+		search.append(deleted)
+		find = { '$and': search }
 
 		try:
 			find = None
@@ -57,7 +59,7 @@ class GetSearchBook(Resource):
 				find = db.bookTitle.find(find).skip(limitBooks * page).limit(limitBooks)
 			else:
 				# find all
-				find = db.bookTitle.find().skip(limitBooks * page).limit(limitBooks)
+				find = db.bookTitle.find(deleted).skip(limitBooks * page).limit(limitBooks)
 
 			for book in find:
 					books.append(book)
