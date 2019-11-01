@@ -82,3 +82,25 @@ class DeleteBook(Resource):
 		except Exception as e:
 			logging.info('error deleteBook: %s', e)
 		return 'Invalid', 400
+
+class GetUserWithId(Resource):
+	def get(self):
+		try:
+			# params
+			token = getToken(request.args['token'])
+
+			# check permission
+			if(token['role'] not in roleHigherThanUser):
+				raise Exception('Not permission to get user info: %s', token)
+
+			user = db.account.find_one({'_id': request.args['username']})
+			user['borrowed'] = convertDateForSeria(user['borrowed'])
+			user.pop('role')
+			user.pop('password')
+
+			return {'user': user}, 200
+
+		except Exception as e:
+			logging.info('error getUserWithId: %s', e)
+		return 'Invalid', 400
+		
