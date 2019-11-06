@@ -9,8 +9,9 @@ class GetPermission(Resource):
 	def get(self):
 		try:
 			token = getToken(request.headers['Authorization'])
-
-			if token != None:
+			ip = request.headers.get('X-Forwarded-For')
+			# check token exist and token ip == request ip
+			if token != None and token['ip'] == ip:
 				return {'role': role.index(token['role'])}, 200
 			return {'role': len(role)}, 200
 		except Exception as e:

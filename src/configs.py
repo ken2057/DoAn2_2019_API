@@ -6,7 +6,7 @@ client = MongoClient(mongodb)
 db = client.library
 
 # token expire time
-tokenExpireTime = 1000000000 #seconds
+tokenExpireTime = 300 #seconds
 
 # book dates much return
 maxDateBorrow = 7

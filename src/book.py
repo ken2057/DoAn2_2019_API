@@ -9,7 +9,6 @@ from src.utils import getAccountWithId, getBookWithId
 ## Get book
 class GetBook(Resource):
 	def get(self):
-		logging.info('book: %s', request.headers.get('X-Forwarded-For'))
 		bookId = int(request.args['bookId'])
 		try:
 			return getBookWithId(bookId), 200

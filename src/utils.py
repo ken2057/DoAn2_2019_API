@@ -8,18 +8,33 @@ def isJsonValid(valid, json):
 			return False
 	return True
 
+def checkTokenExpire(token):
+	# check token expire or not
+	if token['expires'] > datetime.now():
+		# not expire
+		# add more expires time
+		db.token.update_one(
+			{'_id': token['_id']},
+			{'$set': {'expires': calcTokenExprieTime()}}
+		)
+		return token
+	# if expired delete that token
+	db.token.delete_one({'_id': token})
+	return None
+
 ## get token and check expired
 def getToken(token):
-	r = db.token.find_one({'_id': token})
-	if r != None:
-		if r['expires'] > datetime.now():
-			# change expires time
-			db.token.update_one(
-				{'_id': token},
-				{'$set': {'expires': calcTokenExprieTime()}}
-			)
+	result = db.token.find_one({'_id': token})
+	if result != None:
+		return checkTokenExpire(result)
+
+## get token with username
+def getTokenWithUser(username):
+	results = db.token.find({'username': username})
+	for result in results:
+		r = checkTokenExpire(result)
+		if r != None:
 			return r
-		db.token.delete_one({'_id': token})
 	return None
 
 ## Check does username exist in db

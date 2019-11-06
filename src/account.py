@@ -3,7 +3,7 @@ from src.package import *
 from uuid import uuid4
 # -----------------------------------------------------------------------------
 from src.configs import tokenExpireTime, role
-from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria
+from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria, getTokenWithUser
 # -----------------------------------------------------------------------------
 
 ## Login and return token
@@ -11,14 +11,15 @@ class Login(Resource):
 	def findUser(self, username, password):
 		return db.account.find_one({'_id': username, 'password': password})
 
-	def createToken(self, account):
+	def createToken(self, account, ip):
 		token = str(uuid4()).replace('-','')
 		db.token.insert_one(
 			{
 				'_id': token, 
 				'expires': calcTokenExprieTime(),
 				'username': account['_id'],
-				'role': account['role']
+				'role': account['role'],
+				'ip': ip
 			}
 		)
 		return token
@@ -27,10 +28,19 @@ class Login(Resource):
 		try:
 			username = request.args['username']
 			password = request.args['password']
+			ip = request.headers.get('X-Forwarded-For')
 
 			account = self.findUser(username, password)
 			if(account != None):
-				token = self.createToken(account)
+				# get old token if exist
+				result = getTokenWithUser(username)
+				if result != None:
+					# check valid IP
+					if(result['ip'] != ip):
+						return 'Already logged in', 409
+					token = result['_id']
+				else:
+					token = self.createToken(account, ip)
 				return { 'token': token, 'expires': tokenExpireTime }, 200
 			return 'Wrong username/password', 401
 			
