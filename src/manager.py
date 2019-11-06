@@ -95,7 +95,6 @@ class GetUserWithId(Resource):
 
 			user = db.account.find_one({'_id': request.args['username']})
 			user['borrowed'] = convertDateForSeria(user['borrowed'])
-			user.pop('role')
 			user.pop('password')
 
 			return {'user': user}, 200
