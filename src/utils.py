@@ -19,7 +19,7 @@ def checkTokenExpire(token):
 		)
 		return token
 	# if expired delete that token
-	db.token.delete_one({'_id': token})
+	db.token.delete_one({'_id': token['_id']})
 	return None
 
 ## get token and check expired
