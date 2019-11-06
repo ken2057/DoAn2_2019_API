@@ -8,10 +8,10 @@ from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSer
 class GetUsersInfo(Resource):
 	def get(self):
 		try:
-			token = getToken(request.args['token'])
+			token = getToken(request.headers['Authorization'])
 			# token expired or not admin
 			if token == None or token['role'] != role[0]:
-				return '', 403
+				return 'Unauthorized', 401
 			# get all user info
 			users = []
 			for user in db.account.find():
@@ -36,8 +36,8 @@ class SetAccountRole(Resource):
 			# get token check is admin
 			token = getToken(json['token'])
 			# token is not admin or if new role not exist => false
-			if not token['role'] == 'admin' or json['role'] not in role or json['role'] == 'admin':
-				raise Exception('Invalid json/token: %s', json)
+			if token == None or not token['role'] == 'admin' or json['role'] not in role or json['role'] == 'admin':
+				return 'Unauthorized', 401
 			
 			# check account exists => return false
 			account = getAccountWithId(json['accountId'])

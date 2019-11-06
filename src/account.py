@@ -65,7 +65,10 @@ class SignUp(Resource):
 class GetUserBorrowed(Resource):
 	def get(self):
 		try:
-			token = getToken(request.args['token'])
+			token = getToken(request.headers['Authorization'])
+			if token == None:
+				return 'Unauthorized', 401
+
 			account = getAccountWithId(token['username'])
 
 			allBorrowed = convertDateForSeria(account['borrowed'])
@@ -80,7 +83,10 @@ class AccountInfo(Resource):
 	# get account info
 	def get(self):
 		try:
-			token = getToken(request.args['token'])
+			token = getToken(request.headers['Authorization'])
+			if token == None:
+				return 'Unauthorized', 401
+
 			account = getAccountWithId(token['username'])
 
 			account.pop('password')
@@ -95,9 +101,13 @@ class AccountInfo(Resource):
 	
 	def post(self):
 		try:
+
 			json = request.json['json']
 			user = json['user']
 			token = getToken(json['token'])
+			if token == None:
+				return 'Unauthorized', 401
+
 			# if not match username in token and user in
 			if user['username'] != token['username']:
 				raise Exception('Json and token username not match: %s', json)

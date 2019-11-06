@@ -85,10 +85,14 @@ class BorrowBook(Resource):
 	# update book borrow
 	def post(self):
 		try:
-			# json will have token + bookId
+			# json will have bookId
 			json = request.get_json()['json']
 			token = getToken(json['token'])
-			
+			if token == None:
+				return 'Unauthorized', 401
+
+			logging.info(token)
+			logging.info(json)
 			# get account, book from db
 			account = getAccountWithId(token['username'])
 			book = getBookWithId(int(json['bookId']))
@@ -131,9 +135,11 @@ class BorrowBook(Resource):
 class ReturnBook(Resource):
 	def post(self):
 		try:
-			# json will have token, bookId, status (return/lost)
+			# json will have bookId, status (return/lost)
 			json = request.get_json()['json']
 			token = getToken(json['token'])
+			if token == None:
+				return 'Unauthorized', 401
 
 			# get account, book from db
 			account = getAccountWithId(token['username'])
@@ -182,8 +188,11 @@ class ReturnBook(Resource):
 class IsBorrowedById(Resource):
 	def get(self):
 		try: 
+			token = getToken(request.headers['Authorization'])
+			if token == None:
+				return 'Unauthorized', 401
+
 			book = getBookWithId(int(request.args['bookId']))
-			token = getToken(request.args['token'])
 
 			for info in book['books']:
 				if info == token['username']:

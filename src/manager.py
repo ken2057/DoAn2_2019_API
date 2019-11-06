@@ -9,7 +9,9 @@ class GetBorrowed(Resource):
 	def get(self):
 		try:
 			# params
-			token = getToken(request.args['token'])
+			token = getToken(request.headers['Authorization'])
+			if token == None:
+				return 'Unauthorized', 401
 			try:
 				page = int(request.args['page'])
 			except:
@@ -36,8 +38,10 @@ class EditBook(Resource):
 			# json will have: token, Obj(book)
 			json = request.get_json()['json']
 			token = getToken(json['token'])
+			if token == None:
+				return 'Unauthorized', 401
 			bookNew = json['book']
-			bookOld
+			bookOld = getBookWithId(json['isbn'])
 
 			# if not have permission
 			if token['role'] not in roleHigherThanUser:
@@ -64,9 +68,12 @@ class EditBook(Resource):
 class DeleteBook(Resource):
 	def post(self):
 		try:
-			# json will have: token, bookId
+
+			# json will have: bookId
 			json = request.get_json()['json']
 			token = getToken(json['token'])
+			if token == None:
+				return 'Unauthorized', 401
 			book = getBookWithId(json['bookId'])
 
 			# if not have permission
@@ -87,7 +94,9 @@ class GetUserWithId(Resource):
 	def get(self):
 		try:
 			# params
-			token = getToken(request.args['token'])
+			token = getToken(request.headers['Authorization'])
+			if token == None:
+				return 'Unauthorized', 401
 
 			# check permission
 			if(token['role'] not in roleHigherThanUser):

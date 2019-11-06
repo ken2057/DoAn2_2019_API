@@ -8,11 +8,10 @@ from src.utils import isJsonValid, isUserExist, calcTokenExprieTime, getToken
 class GetPermission(Resource):
 	def get(self):
 		try:
-			token = request.args['token']
-			cache = db.token.find_one({'_id' : token })
+			token = getToken(request.headers['Authorization'])
 
-			if cache != None:
-				return {'role': role.index(cache['role'])}, 200
+			if token != None:
+				return {'role': role.index(token['role'])}, 200
 			return {'role': len(role)}, 200
 		except Exception as e:
 			logging.info('error GetPermission: %s', e)
@@ -21,7 +20,10 @@ class GetPermission(Resource):
 class IsTokenExpire(Resource):
 	def get(self):
 		try:
-			token = getToken(request.args['token'])
+			token = getToken(request.headers['Authorization'])
+			if token == None:
+				return 'Unauthorized', 401
+
 			return {'username': token['username'], 'expires': tokenExpireTime}, 200
 
 		except Exception as e:
@@ -31,8 +33,10 @@ class IsTokenExpire(Resource):
 class Logout(Resource):
 	def post(self):
 		try:
-			json = request.json['json']
+			json = request.get_json()['json']
 			token = getToken(json['token'])
+			if token == None:
+				return 'Unauthorized', 401
 
 			# remove token
 			db.token.delete_one({'_id': token['_id']})
