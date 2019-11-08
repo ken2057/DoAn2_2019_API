@@ -57,15 +57,17 @@ class SignUp(Resource):
 				return '', 409
 
 			# create new account
-			db.account.insert_one(
-				{
-					'_id': json['username'], 
-					'password': json['password'], 
-					'email': json['email'], 
-					'role': 'user', 
-					'borrowed': [] 
-				}
-			)
+			with client.start_session() as session:
+				with session.start_transaction():
+					db.account.insert_one(
+						{
+							'_id': json['username'], 
+							'password': json['password'], 
+							'email': json['email'], 
+							'role': 'user', 
+							'borrowed': [] 
+						}
+					)
 			return 'done', 200
 
 		except Exception as e:
@@ -78,9 +80,9 @@ class GetUserBorrowed(Resource):
 			token = getToken(request.headers['Authorization'])
 			if token == None:
 				return 'Unauthorized', 401
-
+			# get account
 			account = getAccountWithId(token['username'])
-
+			# get history borrowed
 			allBorrowed = convertDateForSeria(account['borrowed'])
 
 			return { 'borrowed': allBorrowed }, 200
@@ -117,18 +119,25 @@ class AccountInfo(Resource):
 			token = getToken(json['token'])
 			if token == None:
 				return 'Unauthorized', 401
-
+			
 			# if not match username in token and user in
-			if user['username'] != token['username']:
+			# or token is a admin
+			if user['username'] != token['username'] and token['role'] != 'admin':
 				raise Exception('Json and token username not match: %s', json)
 			# set
 			if user['password'] == '':
 				newInfo = {'email': user['email']}
 			else:
 				newInfo = {'email': user['email'], 'password': user['password']}
+				# if admin edit account
+			if token['role'] == 'admin':
+				newInfo['role'] = user['role']
+
 			# update
-			db.account.update_one({'_id': json['username']}, {'$set': newInfo})
-			
+			with client.start_session() as session:
+				with session.start_transaction():
+					db.account.update_one({'_id': user['username']}, {'$set': newInfo})
+			return 'done', 200
 		except Exception as e:
 			logging.info('error postAccountinfo: %s', e)
 		return 'Inavlid', 400

@@ -46,7 +46,9 @@ class SetAccountRole(Resource):
 				raise Exception("Account is admin, can't change")
 			
 			# update role
-			db.account.update_one({'_id': json['accountId']}, { '$set': {'role': json['role']}})
+			with client.start_session() as session:
+				with session.start_transaction():
+					db.account.update_one({'_id': json['accountId']}, { '$set': {'role': json['role']}})
 
 		except Exception as e:
 			logging.info('error setAccountRole: %s', e)

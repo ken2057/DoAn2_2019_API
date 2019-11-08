@@ -4,4 +4,4 @@ from flask_restful import Resource
 from flask import request
 import logging
 
-from src.configs import db
+from src.configs import db, client

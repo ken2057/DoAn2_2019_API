@@ -91,8 +91,6 @@ class BorrowBook(Resource):
 			if token == None:
 				return 'Unauthorized', 401
 
-			logging.info(token)
-			logging.info(json)
 			# get account, book from db
 			account = getAccountWithId(token['username'])
 			book = getBookWithId(int(json['bookId']))
@@ -122,9 +120,11 @@ class BorrowBook(Resource):
 			#
 			# update db
 			#
-			db.account.update_one({'_id':token['username']}, { '$set': {'borrowed': account['borrowed']}})
-			db.borrowed.insert_one(borrowInfo)
-			db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}})
+			with client.start_session() as session:
+				with session.start_transaction():
+					db.account.update_one({'_id':token['username']}, { '$set': {'borrowed': account['borrowed']}})
+					db.borrowed.insert_one(borrowInfo)
+					db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}})
 
 			return 'done', 200
 
