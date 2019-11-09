@@ -81,11 +81,11 @@ class DeleteBook(Resource):
 				raise Exception('Delete book without permission: %s', token)
 			
 			# update book
-			with client.start_session() as session:
-				with session.start_transaction():
-					db.bookTitle.update_one({'_id': book['_id']}, { '$set': { 'deleted': True }})
+			with client.start_session() as s:
+				with s.start_transaction():
+					u = db.bookTitle.update_one({'_id': book['_id']}, { '$set': { 'deleted': True }}, session=s)
 					log = formatLog(token, 'delete book', 'bookId: ' + str(book['_id']))
-					db.log.insert_one(log)
+					i = db.log.insert_one(log, session=s)
 			return 'done', 200
 
 		except Exception as e:

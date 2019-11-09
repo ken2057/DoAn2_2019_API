@@ -134,9 +134,9 @@ class AccountInfo(Resource):
 				newInfo['role'] = user['role']
 
 			# update
-			with client.start_session() as session:
-				with session.start_transaction():
-					db.account.update_one({'_id': user['username']}, {'$set': newInfo})
+			with client.start_session() as s:
+				with s.start_transaction():
+					u = db.account.update_one({'_id': user['username']}, {'$set': newInfo}, session=s)
 			return 'done', 200
 		except Exception as e:
 			logging.info('error postAccountinfo: %s', e)

@@ -40,9 +40,9 @@ class Logout(Resource):
 				return 'Unauthorized', 401
 
 			# remove token
-			with client.start_session() as session:
-				with session.start_transaction():
-					db.token.delete_one({'_id': token['_id']})
+			with client.start_session() as s:
+				with s.start_transaction():
+					d = db.token.delete_one({'_id': token['_id']}, session=s)
 
 			return 'done', 200
 

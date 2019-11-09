@@ -120,11 +120,12 @@ class BorrowBook(Resource):
 			#
 			# update db
 			#
-			with client.start_session() as session:
-				with session.start_transaction():
-					db.account.update_one({'_id':token['username']}, { '$set': {'borrowed': account['borrowed']}})
-					db.borrowed.insert_one(borrowInfo)
-					db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}})
+			logging.info(oldBooks)
+			with client.start_session() as s:
+				with s.start_transaction():
+					u = db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}}, session=s)
+					u = db.account.update_one({'_id':token['username']}, { '$set': {'borrowed': account['borrowed']}}, session=s)
+					i = db.borrowed.insert_one(borrowInfo, session=s)
 
 			return 'done', 200
 
