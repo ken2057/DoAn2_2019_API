@@ -8,6 +8,7 @@ from src.auth import GetPermission, IsTokenExpire, Logout
 from src.admin import GetUsersInfo, SetAccountRole
 from src.manager import GetBorrowed, DeleteBook, EditBook, GetUserWithId
 from src.account import Login, SignUp, GetUserBorrowed, AccountInfo
+from src.subject import GetSubjects
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
 # for develop
@@ -49,6 +50,9 @@ api.add_resource(GetUserWithId, "/Manager/GetUser") # get
 api.add_resource(GetBorrowed, "/Manager/GetBorrowed") # get
 api.add_resource(DeleteBook, "/Manager/DeleteBook") # post
 api.add_resource(EditBook, "/Manager/EditBook") # post
+
+# subject
+api.add_resource(GetSubjects, "/Subjects") # post
 
 if __name__ == "__main__":
   app.run()

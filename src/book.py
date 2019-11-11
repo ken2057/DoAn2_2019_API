@@ -18,26 +18,26 @@ class GetBook(Resource):
 
 class GetSearchBook(Resource):
 	def get(self):
-		search = []
+		search = {'deleted': False}
 
 		try:
 			name = request.args['name']
 			if name != '':
-				search.append({'name': re.compile(name, re.IGNORECASE)})
+				search['name'] = re.compile(name, re.IGNORECASE)
 		except:
 			pass
 
 		try:
 			subject = request.args['subject']
 			if subject != '':
-				search.append({'subjects': re.compile(subject, re.IGNORECASE)})
+				search['subjects'] = re.compile(subject, re.IGNORECASE)
 		except:
 			pass
 
 		try:
 			author = request.args['author']
 			if author != '':
-				search.append({'author': re.compile(author, re.IGNORECASE)})
+				search['author'] = re.compile(author, re.IGNORECASE)
 		except:
 			pass
 
@@ -48,21 +48,11 @@ class GetSearchBook(Resource):
 			page = 0
 
 		books = []
-		# pymongo query
-		deleted = {'deleted': False}
-		search.append(deleted)
-		find = { '$and': search }
-
 		try:
-			find = None
-			if search != []:
-				find = db.bookTitle.find(find).skip(limitBooks * page).limit(limitBooks)
-			else:
-				# find all
-				find = db.bookTitle.find(deleted).skip(limitBooks * page).limit(limitBooks)
+			find = db.bookTitle.find(search).skip(limitBooks * page).limit(limitBooks).sort("_id")
 
 			for book in find:
-					books.append(book)
+				books.append(book)
 
 			return {'books': books}, 200
 		except Exception as e:
@@ -120,7 +110,6 @@ class BorrowBook(Resource):
 			#
 			# update db
 			#
-			logging.info(oldBooks)
 			with client.start_session() as s:
 				with s.start_transaction():
 					u = db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}}, session=s)

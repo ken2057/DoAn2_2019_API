@@ -14,7 +14,7 @@ class GetUsersInfo(Resource):
 				return 'Unauthorized', 401
 			# get all user info
 			users = []
-			for user in db.account.find():
+			for user in db.account.find().sort([('role', 1), ('_id', 1)]):
 				if 'email' not in user:
 					user['email'] = ''
 				# convert datetime into json

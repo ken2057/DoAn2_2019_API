@@ -22,7 +22,7 @@ class GetBorrowed(Resource):
 				raise Exception('Not admin or manager: %s', token)
 			
 			borrowed = []
-			for i in db.borrowed.find().skip(page * limitBorrow).limit(limitBorrow):
+			for i in db.borrowed.find().skip(page * limitBorrow).limit(limitBorrow).sort('date_borrow'):
 				i.pop('_id')
 				borrowed.append(convertDateForSeria(i))
 			
@@ -41,24 +41,26 @@ class EditBook(Resource):
 			if token == None:
 				return 'Unauthorized', 401
 			bookNew = json['book']
-			bookOld = getBookWithId(json['isbn'])
+			bookOld = getBookWithId(bookNew['isbn'])
 
 			# if not have permission
 			if token['role'] not in roleHigherThanUser:
 				raise Exception('Delete book without permission: %s', token)
 			
 			# update
-			db.bookTitle.remove_one({'_id': bookNew['isbn']})
-			db.bookTitle.insert_one({
-				'_id': bookNew['isbn'],
-				'name': bookNew['name'],
-				'author': bookNew['author'],
-				'subjects': bookNew['subjects'],
-				'books': bookNew['books'],
-				'image': bookNew['image'],
-				'deleted': bookNew['deleted']
-				})
-			db.logging.insert_one(formatLog(token, 'insert book', {'old':bookOld, 'new':bookNew}))
+			with client.start_session() as s:
+				with s.start_transaction():
+					d = db.bookTitle.delete_one({'_id': bookNew['isbn']}, session=s)
+					i = db.bookTitle.insert_one({
+						'_id': bookNew['isbn'],
+						'name': bookNew['name'],
+						'author': bookNew['author'],
+						'subjects': bookNew['subjects'],
+						'books': bookNew['books'],
+						'image': bookNew['image'],
+						'deleted': False
+						}, session=s)
+					db.logging.insert_one(formatLog(token, 'insert book', {'old':bookOld, 'new':bookNew}))
 			return 'done', 200
 
 		except Exception as e:
