@@ -6,7 +6,7 @@ import logging
 from src.book import GetBook, GetSearchBook, BorrowBook, ReturnBook, IsBorrowedById
 from src.auth import GetPermission, IsTokenExpire, Logout
 from src.admin import GetUsersInfo, SetAccountRole
-from src.manager import GetBorrowed, DeleteBook, EditBook, GetUserWithId
+from src.manager import GetBorrowed, DeleteBook, EditBook, GetUserWithId, ActiveAccount
 from src.account import Login, SignUp, GetUserBorrowed, AccountInfo
 from src.subject import GetSubjects
 from src.borrowed import Borrowed
@@ -51,6 +51,7 @@ api.add_resource(GetUserWithId, "/Manager/GetUser") # get
 api.add_resource(GetBorrowed, "/Manager/GetBorrowed") # get
 api.add_resource(DeleteBook, "/Manager/DeleteBook") # post
 api.add_resource(EditBook, "/Manager/EditBook") # post
+api.add_resource(ActiveAccount, "/Manager/ActiveAccount") # post
 
 # subject
 api.add_resource(GetSubjects, "/Subjects") # post

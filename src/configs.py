@@ -23,6 +23,12 @@ maximumBookCanBorrow = 5
 # fee per day not return
 feePerDay = 1000
 
+# max date of account
+maxDateAccount = 6*30 # day
+
+# max time hold book 'Get book from librarian'
+maxTimeHoldOrder = 12 #hours
+
 # role in db
 #       0        1          2
 role = ['admin', 'manager', 'user']
@@ -36,7 +42,8 @@ statusBorrow = {
     'lost': 'Lost',
     'wait_to_get': 'Get book from librarian',
     'paied': 'Paied',
-    'cancel': 'Canceled order'
+    'cancel': 'Canceled order',
+    'hold_timeout': 'Hold order too long'
 }
 
 # status when borrow book
@@ -45,3 +52,11 @@ statusBorrow_block = [
     'Watting for avaialbe',
     'Get book from librarian'
 ]
+
+# user point when return/cancel/lost book
+userPoint = {
+    'return': 1,
+    'cancel': -2,
+    'hold_timeout': -3,
+    'lost': -3
+}

@@ -2,7 +2,7 @@
 from src.package import *
 from uuid import uuid4
 # -----------------------------------------------------------------------------
-from src.configs import tokenExpireTime, role
+from src.configs import tokenExpireTime, role, maxDateAccount
 from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria, getTokenWithUser, calcDateExpire
 # -----------------------------------------------------------------------------
 
@@ -56,10 +56,15 @@ class SignUp(Resource):
 			if db.account.find_one({'_id': json['username']}) != None:
 				return '', 409
 
+			if 'birth' not in json:
+				json['birth'] = ''
+			if 'address' not in json:
+				json['address'] = ''
+
 			# create new account
-			with client.start_session() as session:
-				with session.start_transaction():
-					db.account.insert_one(
+			with client.start_session() as s:
+				with s.start_transaction():
+					i = db.account.insert_one(
 						{
 							'_id': json['username'], 
 							'password': json['password'], 
@@ -68,10 +73,12 @@ class SignUp(Resource):
 							'borrowed': [],
 							'birth': json['birth'],
 							'address': json['address'],
+							'account_point': 0,
 							'date_created': datetime.now(),
 							# based on the requirement, account only work for 6 months
-							'date_expire': calcDateExpire(6*30*24) 
-						}
+							'date_expire': calcDateExpire(maxDateAccount*24)[0],
+							'active': False
+						}, session = s
 					)
 			return 'done', 200
 
@@ -108,6 +115,9 @@ class AccountInfo(Resource):
 
 			account.pop('password')
 			account.pop('role')
+			if 'account_point' in account:
+				account.pop('account_point')
+
 			account['borrowed'] = convertDateForSeria(account['borrowed'])
 
 			return {'account': account}, 200

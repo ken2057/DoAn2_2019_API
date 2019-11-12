@@ -3,8 +3,8 @@ from src.package import *
 import re
 from copy import copy
 # -----------------------------------------------------------------------------
-from src.configs import limitBooks, statusBorrow, statusBorrow_block, maximumBookCanBorrow
-from src.utils import isJsonValid, getToken, calcBorrowExpireTime
+from src.configs import limitBooks, statusBorrow, statusBorrow_block, maximumBookCanBorrow, maxTimeHoldOrder, userPoint
+from src.utils import isJsonValid, getToken, calcBorrowExpireTime, calcDateExpire
 from src.utils import getAccountWithId, getBookWithId
 # -----------------------------------------------------------------------------
 # Get book
@@ -113,7 +113,7 @@ class BorrowBook(Resource):
 			account['borrowed'].append(copy(borrowInfo))
 			# get index of book not borrowed
 			index = book['books'].index('')
-			book['books'][index] = token['username']
+			book['books'][index] = borrowInfo['_id']
 			# add data that only show in collection borrowed
 			borrowInfo['history_status'] = [
 				{'status': statusBorrow['wait_to_get'], 'date': now}
@@ -161,7 +161,7 @@ class ReturnBook(Resource):
 				if info['bookId'] == int(json['bookId']) and info['status'] in statusBorrow_block:
 					borrowInfo = info
 					break
-			index = book['books'].index(token['username'])
+			index = book['books'].index(borrowInfo['_id'])
 			#
 			# remove previous borrowed info
 			#
@@ -171,13 +171,14 @@ class ReturnBook(Resource):
 			)
 
 			# if user return book or cancel order
-			if json['status'] in ['return', 'cancel']:
+			if json['status'] == 'return':
+				borrowInfo['date_return'] = datetime.now()
+				book['books'][index] = ''
+			elif json['status'] == 'cancel':
 				book['books'][index] = ''
 			else:
 				# if user lost the book
-				# book['books'].remove(token['username'])
-				book['books'][index] = 'Lost by ' + token['username'] + \
-					' - Date: ' + datetime.now().__str__()
+				book['books'][index] = 'Lost by ' + token['username'] + ' - Date: ' + datetime.now().__str__()
 
 			#
 			# update borrowed info
@@ -185,11 +186,12 @@ class ReturnBook(Resource):
 			borrowInfo['status'] = statusBorrow[json['status']]
 			h = {'status': borrowInfo['status'], 'date': datetime.now()}
 
-			if json['status'] == 'return':
-				borrowInfo['date_return'] = datetime.now()
-
 			account['borrowed'].append(borrowInfo)
 			history_in_borrowed['history_status'].append(h)
+			# update declare
+			update_account = {'borrowed': account['borrowed']}
+			if 'account_point' in account:
+				update_account['account_point'] = account['account_point'] + userPoint[json['status']]
 			#
 			# update db
 			#
@@ -198,7 +200,7 @@ class ReturnBook(Resource):
 					# update in Account
 					u = db.account.update_one(
 						{'_id': token['username']},
-						{'$set': {'borrowed': account['borrowed']}},
+						{'$set': update_account },
 						session=s
 					)
 					# update in Borrowed
@@ -225,28 +227,107 @@ class ReturnBook(Resource):
 
 
 class IsBorrowedById(Resource):
+	def removeHold(self, book, borrowId):
+		# get data
+		account = getAccountWithId(borrowId.split('-')[0])
+		borrowed = db.borrowed.find_one({'_id': borrowId})
+
+		# get borrow from user borrowed list
+		acc_borrow = None
+		acc_borrow_index = None
+		for pos, b in enumerate(account['borrowed']):
+			if b['_id'] == borrowId:
+				acc_borrow = b
+				acc_borrow_index = pos
+				break
+
+		# update local data
+		book_index = book['books'].index(borrowId)
+		book['books'][book_index] = ''
+
+		acc_borrow['status'] = statusBorrow['hold_timeout']
+		account['borrowed'].pop(acc_borrow_index)
+		account['borrowed'].append(acc_borrow)
+		update_account = {'borrowed': account['borrowed']}
+		# if user have account_point remove -3 points for timeout hold
+		if 'account_point' in account:			
+			update_one['account_point'] = account['account_point'] + userPoint['hold_timeout']
+
+		borrowed['history_status'].append({
+			'status': statusBorrow['hold_timeout'],
+			'date': datetime.now()
+		})
+		
+		# start session to remove the hold
+		with client.start_session() as s:
+			with s.start_transaction():
+				u = db.bookTitle.update_one(
+					{'_id': book['_id']},
+					{'$set': {'books': book['books']}},
+					session = s
+				)
+
+				u = db.account.update_one(
+					{'_id': account['_id']},
+					{'$set': update_account},
+					session = s	
+				)
+
+				u = db.borrowed.update_one(
+					{'_id': borrowed['_id']},
+					{'$set': {
+						'status': statusBorrow['hold_timeout'],
+						'history_status': borrowed['history_status']
+					}},
+					session = s	
+				)
+
 	def get(self):
 		try:
 			token = getToken(request.headers['Authorization'])
-			if token == None:
-				return 'Unauthorized', 401
-
+			flag = (token != None)
+			# if token == None:
+			# 	return 'Unauthorized', 401
 			bookId = int(request.args['bookId'])
 			book = getBookWithId(bookId)
 
-			history = getAccountWithId(token['username'])['borrowed']
+			if flag:
+				account = getAccountWithId(token['username'])
+				history = account['borrowed']
+				# if account not active by manager or admin
+				# => it can't borrow the book
+				if 'active' in account and not account['active']:
+					return {'status': 'Your account is not active, contact the manager'}, 200
+				# check if account_point <= -10 => block user from borrow
+				if 'account_point' in account and account['account_point'] <= -10:
+					return {'status': 'You have been blocked to borrow book'}, 200
 
+
+			# check if current user have been borrowed this book
 			for i in book['books']:
-				if i == token['username']:
+				if flag and i == token['username']:
 					# get all book on borrowed and order by user
 					for h in history:
 						if h['bookId'] == bookId and h['status'] in statusBorrow_block:
 							return {'status': h['status']}, 200
+				elif i == '':
+					return {'status': 'Borrow'}, 200
 			else:
-				# if borrowed 5 books then can't borrowe any more
-				if maximumBookCanBorrow == len([h for h in history if h['status'] in statusBorrow_block]):
+				# if user borrowed 5 books then can't borrow any more
+				if flag and maximumBookCanBorrow == len([h for h in history if h['status'] in statusBorrow_block]):
 					return {'status': 'Maximum Book Can Borrow'}, 200
-			return {'status': 'Borrow'}, 200
+
+			# check if any 'Get book from librarian' expire
+			listBorrwedId = [x for x in book['books'] if x != '']
+			for borrow in db.borrowed.find({'_id': {'$in': listBorrwedId}}):
+				# if on hold
+				if borrow['status'] == 'Get book from librarian':
+					# if time from start hold expired
+					if borrow['date_borrow'] < datetime.now():
+						self.removeHold(book, borrow['_id'])
+						return {'status': 'Borrow'}, 200
+
+			return {'status': 'Out of order'}, 200
 
 		except Exception as e:
 			logging.info('error IsBorrowedById: %s', e)

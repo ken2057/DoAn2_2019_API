@@ -50,6 +50,7 @@ class EditBook(Resource):
 			token = getToken(json['token'])
 			if token == None:
 				return 'Unauthorized', 401
+
 			bookNew = json['book']
 			bookOld = getBookWithId(bookNew['isbn'])
 
@@ -120,7 +121,7 @@ class GetUserWithId(Resource):
 				raise Exception('Not permission to get user info: %s', token)
 
 			user = db.account.find_one({'_id': request.args['username']})
-			user['borrowed'] = convertDateForSeria(user['borrowed'])
+			user = convertDateForSeria(user)
 			user.pop('password')
 
 			return {'user': user}, 200
@@ -129,3 +130,37 @@ class GetUserWithId(Resource):
 			logging.info('error getUserWithId: %s', e)
 		return 'Invalid', 400
 		
+class ActiveAccount(Resource):
+	def post(self):
+		try:
+			# params
+			json = request.get_json()['json']
+			token = getToken(json['token'])
+			if token == None:
+				return 'Unauthorized', 401
+			
+			# check permission
+			if(token['role'] not in roleHigherThanUser):
+				raise Exception('Not permission to get user info: %s', token)
+			
+			# get account
+			account = getAccountWithId(json['username'])
+
+			# check if that account not admin
+			if account['role'] != 'admin':
+				active = True
+				if 'active' in account:
+					active = account['active']
+				# update book
+				with client.start_session() as s:
+					with s.start_transaction():
+						u = db.account.update_one(
+							{'_id': account['_id']},
+							{'$set': {'active': not active}},
+							session = s
+						)
+			return 'done', 200
+
+		except Exception as e:
+			logging.info('error postActiveAccount: %s', e)
+		return 'Invalid', 400

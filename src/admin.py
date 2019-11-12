@@ -40,6 +40,7 @@ class GetUsersInfo(Resource):
 				user.pop('password')
 				#
 				users.append(user)
+
 			return {'users': users}, 200
 				
 		except Exception as e:

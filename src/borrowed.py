@@ -31,4 +31,18 @@ class Borrowed(Resource):
 
     # update info of borrowed
     def post(self):
-        return '', 200
+        try:
+            json = request.json
+            token = getToken(json['token'])
+            borrowed = json['borrowed']
+
+            # check is admin or manager
+            if token['role'] not in roleHigherThanUser:
+                return 'Unauthorized', 401
+            
+            with client.start_session() as s:
+                with session.start_transaction():
+                    pass
+        except Exception as e:
+            logging.info('error postBorrowed: %s', e)
+        return 'Invalid', 400
