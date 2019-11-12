@@ -118,7 +118,7 @@ class AccountInfo(Resource):
 			if 'account_point' in account:
 				account.pop('account_point')
 
-			account['borrowed'] = convertDateForSeria(account['borrowed'])
+			account = convertDateForSeria(account)
 
 			return {'account': account}, 200
 

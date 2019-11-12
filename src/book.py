@@ -300,7 +300,7 @@ class IsBorrowedById(Resource):
 					return {'status': 'Your account is not active, contact the manager'}, 200
 				# check if account_point <= -10 => block user from borrow
 				if 'account_point' in account and account['account_point'] <= -10:
-					return {'status': 'You have been blocked to borrow book'}, 200
+					return {'status': 'You have been blocked from borrow book'}, 200
 
 
 			# check if current user have been borrowed this book
