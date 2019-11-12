@@ -22,10 +22,20 @@ class GetBorrowed(Resource):
 				raise Exception('Not admin or manager: %s', token)
 			
 			borrowed = []
-			for i in db.borrowed.find().skip(page * limitBorrow).limit(limitBorrow).sort('date_borrow'):
-				i.pop('_id')
+			for i in db.borrowed.find({ "deleted" : { "$exists" : False } }).skip(page * limitBorrow).limit(limitBorrow).sort('date_borrow'):
+				# convert datetime in history_status
+				newHS = []
+				for hs in i['history_status']:
+					newHS.append({
+						'status': hs['status'],
+						'date': convertDateForSeria(hs['date'])
+					})
+				i['history_status'] = newHS
+				i['_id'] = i['_id'].__str__()
+
 				borrowed.append(convertDateForSeria(i))
-			
+
+
 			return { 'borrowed': borrowed }, 200
 
 		except Exception as e:
@@ -58,7 +68,10 @@ class EditBook(Resource):
 						'subjects': bookNew['subjects'],
 						'books': bookNew['books'],
 						'image': bookNew['image'],
-						'deleted': False
+						'deleted': False,
+						'year_released': bookNew['year_released'],
+						'publisher': bookNew['publisher'],
+						'price': bookNew['price']
 						}, session=s)
 					db.logging.insert_one(formatLog(token, 'insert book', {'old':bookOld, 'new':bookNew}))
 			return 'done', 200

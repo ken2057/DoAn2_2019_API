@@ -17,9 +17,28 @@ class GetUsersInfo(Resource):
 			for user in db.account.find().sort([('role', 1), ('_id', 1)]):
 				if 'email' not in user:
 					user['email'] = ''
+				if 'address' not in user:
+					user['address'] = ''
 				# convert datetime into json
 				user['borrowed'] = convertDateForSeria(user['borrowed'])
+				#
+				if 'birth' in user:
+					user['birth'] = convertDateForSeria(user['birth']) 
+				else:
+					user['birth'] = ''
+				#
+				if 'date_created' in user:
+					user['date_created'] = convertDateForSeria(user['date_created']) 
+				else:
+					user['date_created'] = ''
+				#
+				if 'date_expire' in user:
+					user['date_expire'] = convertDateForSeria(user['date_expire']) 
+				else:
+					user['date_expire'] = ''
+				# remove some unnecessary infomartion
 				user.pop('password')
+				#
 				users.append(user)
 			return {'users': users}, 200
 				

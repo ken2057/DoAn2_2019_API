@@ -3,7 +3,7 @@ from src.package import *
 from uuid import uuid4
 # -----------------------------------------------------------------------------
 from src.configs import tokenExpireTime, role
-from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria, getTokenWithUser
+from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria, getTokenWithUser, calcDateExpire
 # -----------------------------------------------------------------------------
 
 ## Login and return token
@@ -65,7 +65,12 @@ class SignUp(Resource):
 							'password': json['password'], 
 							'email': json['email'], 
 							'role': 'user', 
-							'borrowed': [] 
+							'borrowed': [],
+							'birth': json['birth'],
+							'address': json['address'],
+							'date_created': datetime.now(),
+							# based on the requirement, account only work for 6 months
+							'date_expire': calcDateExpire(6*30*24) 
 						}
 					)
 			return 'done', 200
@@ -125,11 +130,17 @@ class AccountInfo(Resource):
 			if user['username'] != token['username'] and token['role'] != 'admin':
 				raise Exception('Json and token username not match: %s', json)
 			# set
-			if user['password'] == '':
-				newInfo = {'email': user['email']}
-			else:
-				newInfo = {'email': user['email'], 'password': user['password']}
-				# if admin edit account
+			newInfo = {}
+			if user['password'] != '':
+				newInfo['password'] = user['password']
+			if 'email' in user:
+				newInfo['email'] = user['email']
+			if 'address' in user:
+				newInfo['address'] = user['address']	
+			if 'birth' in user:
+				newInfo['birth'] = user['birth']
+				
+			# if admin edit account
 			if token['role'] == 'admin':
 				newInfo['role'] = user['role']
 

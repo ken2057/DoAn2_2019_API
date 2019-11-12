@@ -1,12 +1,15 @@
 # all the same import of api will be here
 from src.package import *
 import re
+from copy import copy
 # -----------------------------------------------------------------------------
-from src.configs import limitBooks, statusBorrow
+from src.configs import limitBooks, statusBorrow, statusBorrow_block, maximumBookCanBorrow
 from src.utils import isJsonValid, getToken, calcBorrowExpireTime
 from src.utils import getAccountWithId, getBookWithId
 # -----------------------------------------------------------------------------
-## Get book
+# Get book
+
+
 class GetBook(Resource):
 	def get(self):
 		bookId = int(request.args['bookId'])
@@ -15,6 +18,7 @@ class GetBook(Resource):
 		except Exception as e:
 			logging.info('error getbook: ', e)
 		return 'Invalid', 400
+
 
 class GetSearchBook(Resource):
 	def get(self):
@@ -49,7 +53,8 @@ class GetSearchBook(Resource):
 
 		books = []
 		try:
-			find = db.bookTitle.find(search).skip(limitBooks * page).limit(limitBooks).sort("_id")
+			find = db.bookTitle.find(search).skip(
+				limitBooks * page).limit(limitBooks).sort("_id")
 
 			for book in find:
 				books.append(book)
@@ -59,13 +64,14 @@ class GetSearchBook(Resource):
 			logging.info('error searchBook: %s', e)
 		return 'Invalid', 400
 
+
 class BorrowBook(Resource):
 	# check can borrow book or not
 	def get(self):
 		try:
 			bookId = int(request.args['bookId'])
 			book = getBookWithId(bookId)
-
+			# check an empty book of that book can be borrow
 			flag = ('' in book['books'])
 			return flag, 200
 		except Exception as e:
@@ -91,29 +97,43 @@ class BorrowBook(Resource):
 			# if book not avaiable
 			if '' not in book['books']:
 				return 'Out of order', 400
-
+			
 			# some varibles
 			now = datetime.now()
 			borrowInfo = {
+				'_id': token['username'] + '-' + json['bookId'] + '-' + now.__str__(),
 				'username': token['username'],
 				'bookId': int(json['bookId']),
-				'status': statusBorrow['start'],
+				'status': statusBorrow['wait_to_get'],
 				'date_borrow': now,
-				'date_expire': calcBorrowExpireTime(now)
+				'date_expire': calcBorrowExpireTime(now),
+				'date_return': ''
 			}
 			# add new Order
-			account['borrowed'].append(borrowInfo)
+			account['borrowed'].append(copy(borrowInfo))
 			# get index of book not borrowed
 			index = book['books'].index('')
 			book['books'][index] = token['username']
-			
+			# add data that only show in collection borrowed
+			borrowInfo['history_status'] = [
+				{'status': statusBorrow['wait_to_get'], 'date': now}
+			]
+
 			#
 			# update db
 			#
 			with client.start_session() as s:
 				with s.start_transaction():
-					u = db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}}, session=s)
-					u = db.account.update_one({'_id':token['username']}, { '$set': {'borrowed': account['borrowed']}}, session=s)
+					u = db.bookTitle.update_one(
+						{'_id': int(json['bookId'])},
+						{'$set': {'books': book['books']}},
+						session=s
+					)
+					u = db.account.update_one(
+						{'_id': token['username']},
+						{'$set': {'borrowed': account['borrowed']}},
+						session=s
+					)
 					i = db.borrowed.insert_one(borrowInfo, session=s)
 
 			return 'done', 200
@@ -121,6 +141,7 @@ class BorrowBook(Resource):
 		except Exception as e:
 			logging.info('error post orderBook: %s', e)
 		return 'Invalid', 400
+
 
 class ReturnBook(Resource):
 	def post(self):
@@ -137,7 +158,7 @@ class ReturnBook(Resource):
 			# get borrowed info
 			borrowInfo = None
 			for info in account['borrowed']:
-				if info['bookId'] == int(json['bookId']) and info['status'] == statusBorrow['start']:
+				if info['bookId'] == int(json['bookId']) and info['status'] in statusBorrow_block:
 					borrowInfo = info
 					break
 			index = book['books'].index(token['username'])
@@ -145,29 +166,56 @@ class ReturnBook(Resource):
 			# remove previous borrowed info
 			#
 			account['borrowed'].remove(borrowInfo)
-			db.borrowed.delete_one(borrowInfo)
-				# if user return book
-			if json['status'] == 'return':
+			history_in_borrowed = db.borrowed.find_one(
+				{'_id': borrowInfo['_id']}
+			)
+
+			# if user return book or cancel order
+			if json['status'] in ['return', 'cancel']:
 				book['books'][index] = ''
 			else:
 				# if user lost the book
 				# book['books'].remove(token['username'])
-				book['books'][index] = 'Lost by ' + token['username'] +' - Date: '+ datetime.now().__str__()
-			
+				book['books'][index] = 'Lost by ' + token['username'] + \
+					' - Date: ' + datetime.now().__str__()
+
 			#
 			# update borrowed info
 			#
 			borrowInfo['status'] = statusBorrow[json['status']]
+			h = {'status': borrowInfo['status'], 'date': datetime.now()}
+
 			if json['status'] == 'return':
 				borrowInfo['date_return'] = datetime.now()
 
 			account['borrowed'].append(borrowInfo)
+			history_in_borrowed['history_status'].append(h)
 			#
 			# update db
 			#
-			db.account.update_one({'_id':token['username']}, { '$set': {'borrowed':account['borrowed']}})
-			db.borrowed.insert_one(borrowInfo)
-			db.bookTitle.update_one({'_id': int(json['bookId'])}, { '$set': {'books': book['books']}})
+			with client.start_session() as s:
+				with s.start_transaction():
+					# update in Account
+					u = db.account.update_one(
+						{'_id': token['username']},
+						{'$set': {'borrowed': account['borrowed']}},
+						session=s
+					)
+					# update in Borrowed
+					u = db.borrowed.update_one(
+						{'_id': borrowInfo['_id']},
+						{'$set': {
+							'history_status': history_in_borrowed['history_status'], 
+							'status': copy(borrowInfo['status']), 
+							'date_return': copy(borrowInfo['date_return'])
+						}},session=s
+					)
+					# update in bookTitle
+					u = db.bookTitle.update_one(
+						{'_id': int(json['bookId'])},
+						{'$set': {'books': book['books']}},
+						session=s
+					)
 
 			return 'done', 200
 
@@ -175,19 +223,30 @@ class ReturnBook(Resource):
 			logging.info('error returnBook: %s', e)
 		return 'Invalid', 400
 
+
 class IsBorrowedById(Resource):
 	def get(self):
-		try: 
+		try:
 			token = getToken(request.headers['Authorization'])
 			if token == None:
 				return 'Unauthorized', 401
 
-			book = getBookWithId(int(request.args['bookId']))
+			bookId = int(request.args['bookId'])
+			book = getBookWithId(bookId)
 
-			for info in book['books']:
-				if info == token['username']:
-					return {'borrowed': True}, 200
-			return {'borrowed': False}, 200
+			history = getAccountWithId(token['username'])['borrowed']
+
+			for i in book['books']:
+				if i == token['username']:
+					# get all book on borrowed and order by user
+					for h in history:
+						if h['bookId'] == bookId and h['status'] in statusBorrow_block:
+							return {'status': h['status']}, 200
+			else:
+				# if borrowed 5 books then can't borrowe any more
+				if maximumBookCanBorrow == len([h for h in history if h['status'] in statusBorrow_block]):
+					return {'status': 'Maximum Book Can Borrow'}, 200
+			return {'status': 'Borrow'}, 200
 
 		except Exception as e:
 			logging.info('error IsBorrowedById: %s', e)

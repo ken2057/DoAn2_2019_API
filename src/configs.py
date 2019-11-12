@@ -9,13 +9,19 @@ db = client.library
 tokenExpireTime = 300 #seconds
 
 # book dates much return
-maxDateBorrow = 7
+maxDateBorrow = 4
 
 # limit books per find
 limitBooks = 20
 
 # limit history per find
 limitBorrow = 20
+
+# max book can borrow
+maximumBookCanBorrow = 5
+
+# fee per day not return
+feePerDay = 1000
 
 # role in db
 #       0        1          2
@@ -27,5 +33,15 @@ statusBorrow = {
     'return' : 'Returned',
     'start': 'On borrowing',
     'order': 'Watting for avaialbe',
-    'lost': 'Lost'
+    'lost': 'Lost',
+    'wait_to_get': 'Get book from librarian',
+    'paied': 'Paied',
+    'cancel': 'Canceled order'
 }
+
+# status when borrow book
+statusBorrow_block = [
+    'On borrowing',
+    'Watting for avaialbe',
+    'Get book from librarian'
+]
