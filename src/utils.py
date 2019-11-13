@@ -54,6 +54,7 @@ def calcDateExpire(time):
 def calcBorrowExpireTime(now):
 	return now + timedelta(days = maxDateBorrow)
 
+
 # convert python datetime.datetime to str for json serializable
 # input can be list/dict/datetime
 # it will run through every thing in list/dict to convert datetime into json
@@ -71,11 +72,12 @@ def convertDateForSeria(data):
 		return run_convertDateForSeria(data)
 	# input is datetime
 	else:
-		return data.__str__()
+		return data.__str__().replace('-', '/')
 	
 def run_convertDateForSeria(json):
 	for key in json:
-		json[key] = convertDateForSeria(json[key])
+		if key != '_id':
+			json[key] = convertDateForSeria(json[key])
 	return json
 
 
@@ -92,13 +94,19 @@ def getBookWithId(bookId):
 	return db.bookTitle.find_one({'_id':bookId, 'deleted': False})
 
 # ------------------------------------------------------------------------------
-# Logging
+# formating
 # ------------------------------------------------------------------------------
 def formatLog(token, action, note):
 	return {
-		'time': datetime.now(),
+		'time': getDateFormat(datetime.now()),
 		'username': token['username'], 
 		'role': token['role'], 
 		'action': action,
 		'note': note
 	}
+
+def formatHistoryStatus(status, date, by):
+	return {'status': status, 'date': date, 'by': by}
+
+def formatDate(time):
+	return datetime(time.year, time.month, time.day, time.hour, time.minute, time.second)

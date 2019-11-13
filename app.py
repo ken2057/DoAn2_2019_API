@@ -3,13 +3,13 @@ from flask_restful import Api
 from flask_cors import CORS
 import logging
 # -----------------------------------------------------------------------------
-from src.book import GetBook, GetSearchBook, BorrowBook, ReturnBook, IsBorrowedById
+from src.book import GetBook, GetSearchBook, BorrowBook, IsBorrowedById, CancelBookOrder
 from src.auth import GetPermission, IsTokenExpire, Logout
 from src.admin import GetUsersInfo, SetAccountRole
 from src.manager import GetBorrowed, DeleteBook, EditBook, GetUserWithId, ActiveAccount
 from src.account import Login, SignUp, GetUserBorrowed, AccountInfo
 from src.subject import GetSubjects
-from src.borrowed import Borrowed, GetSearchBorrowed
+from src.borrowed import Borrowed, GetSearchBorrowed, UpdateBorrowed
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
 # for develop
@@ -26,8 +26,8 @@ api.add_resource(GetSearchBook, "/GetSearchBook") #get
   # post: borrow a book
   # get: check does that book still avaiable
 api.add_resource(BorrowBook, "/BorrowBook") # post/get
-api.add_resource(ReturnBook, "/ReturnBook") # post
 api.add_resource(IsBorrowedById, "/IsBorrowedById") # get
+api.add_resource(CancelBookOrder, "/CancelBookOrder") # get
 
 # auth
 api.add_resource(GetPermission, "/Permission") # get
@@ -59,6 +59,7 @@ api.add_resource(GetSubjects, "/Subjects") # post
 # borrowed
 api.add_resource(Borrowed, "/Borrowed") # get/post
 api.add_resource(GetSearchBorrowed, "/SearchBorrowed") # get
+api.add_resource(UpdateBorrowed, "/UpdateBorrowed") # post
 
 if __name__ == "__main__":
   app.run()

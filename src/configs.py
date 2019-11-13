@@ -37,7 +37,7 @@ roleHigherThanUser = ['admin', 'manager']
 # status of borrow
 statusBorrow = {
     'return' : 'Returned',
-    'start': 'On borrowing',
+    'sent': 'On borrowing',
     'order': 'Watting for avaialbe',
     'lost': 'Lost',
     'wait_to_get': 'Get book from librarian',

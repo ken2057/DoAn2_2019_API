@@ -36,13 +36,13 @@ else:
                 {
                     '_id': 'bui', 
                     'password': '40bd001563085fc35165329ea1ff5c5ecbdbbeef',
-                    'role': 'manager', 
+                    'role': 'admin', 
                     'borrowed': []
                 },
                 {
                     '_id': 'hieu', 
                     'password': '40bd001563085fc35165329ea1ff5c5ecbdbbeef',
-                    'role': 'manager', 
+                    'role': 'admin', 
                     'borrowed': []
                 },
             ])
