@@ -42,7 +42,7 @@ statusBorrow = {
     'lost': 'Lost',
     'wait_to_get': 'Get book from librarian',
     'paied': 'Paied',
-    'cancel': 'Canceled order',
+    'cancel': 'Canceled',
     'hold_timeout': 'Hold order too long'
 }
 
