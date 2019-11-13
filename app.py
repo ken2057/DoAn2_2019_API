@@ -58,7 +58,7 @@ api.add_resource(GetSubjects, "/Subjects") # post
 
 # borrowed
 api.add_resource(Borrowed, "/Borrowed") # get/post
-api.add_resource(Borrowed, "/SearchBorrowed") # get
+api.add_resource(GetSearchBorrowed, "/SearchBorrowed") # get
 
 if __name__ == "__main__":
   app.run()
