@@ -71,12 +71,12 @@ class GetSearchBorrowed(Resource):
 				page = 0
 
 			borrowed = []
-				find = db.borrowed.find(search).skip(limitBooks * page).limit(limitBooks).sort("_id")
+			find = db.borrowed.find(search).skip(limitBooks * page).limit(limitBooks).sort("_id")
 
-				for borrwed in find:
-					borrowed.append(convertDateForSeria(borrowed))
+			for borrwed in find:
+				borrowed.append(convertDateForSeria(borrowed))
 
-				return {'borrowed': borrowed}, 200
+			return {'borrowed': borrowed}, 200
 		except Exception as e:
 			logging.info('error searchBorrowed: %s', e)
 		return 'Invalid', 400
