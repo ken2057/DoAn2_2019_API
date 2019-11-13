@@ -20,7 +20,7 @@ else:
         'date_borrow': datetime.now(),
         'date_expire': dateReturn(datetime.now()),
         'fee': 0,
-        'paied': 0
+        'paid': 0
     }
 
     if db.list_collection_names() == []:
