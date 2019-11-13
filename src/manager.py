@@ -12,14 +12,15 @@ class GetBorrowed(Resource):
 			token = getToken(request.headers['Authorization'])
 			if token == None:
 				return 'Unauthorized', 401
+			# check permission
+			if token['role'] not in roleHigherThanUser:
+				return 'Unauthorized', 401
+				
 			try:
 				page = int(request.args['page'])
 			except:
 				page = 0
 		
-			# check permission
-			if token['role'] not in roleHigherThanUser:
-				raise Exception('Not admin or manager: %s', token)
 			
 			borrowed = []
 			for i in db.borrowed.find({ "deleted" : { "$exists" : False } }).skip(page * limitFindBorrowed).limit(limitFindBorrowed).sort('date_borrow'):
