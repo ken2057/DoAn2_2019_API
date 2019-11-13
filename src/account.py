@@ -36,8 +36,8 @@ class Login(Resource):
 				result = getTokenWithUser(username)
 				if result != None:
 					# check valid IP
-					if(result['ip'] != ip):
-						return 'Already logged in', 409
+					# if(result['ip'] != ip):
+					#	return 'Already logged in', 409
 					token = result['_id']
 				else:
 					token = self.createToken(account, ip)
