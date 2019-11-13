@@ -79,7 +79,10 @@ class GetSearchBorrowed(Resource):
 				result = db.borrowed.find().skip(limitFindBorrowed * page).limit(limitFindBorrowed).sort("_id")
 
 			for borrwed in result:
+				logging.info('............................')	
 				borrowed.append(convertDateForSeria(borrowed))
+			logging.info('------------------')	
+			logging.info(borrowed)
 
 			return {'borrowed': borrowed}, 200
 		except Exception as e:
