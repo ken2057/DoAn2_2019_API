@@ -52,7 +52,10 @@ class GetSearchBorrowed(Resource):
 		try:
 			# check auth and role of user
 			token = getToken(request.headers['Authorization'])
-			if token == None or token['role'] not in roleHigherThanUser:
+			if token == None:
+				return 'Unauthorized', 401
+			# check permission
+			if token['role'] not in roleHigherThanUser:
 				return 'Unauthorized', 401
 			
 			# if search borrowed with username => search only with that borrowed by user
@@ -79,12 +82,17 @@ class GetSearchBorrowed(Resource):
 				result = db.borrowed.find().skip(limitFindBorrowed * page).limit(limitFindBorrowed).sort("_id")
 
 			for borrwed in result:
-				logging.info('............................')	
-				t = convertDateForSeria(borrowed)
-				logging.info(t)
-				borrowed.append(t)
-			logging.info('------------------')	
-			logging.info(borrowed)
+				# convert datetime in history_status
+				newHS = []
+				for hs in i['history_status']:
+					newHS.append({
+						'status': hs['status'],
+						'date': convertDateForSeria(hs['date'])
+					})
+				i['history_status'] = newHS
+				i['_id'] = i['_id'].__str__()
+				
+				borrowed.append(convertDateForSeria(i))
 
 			return {'borrowed': borrowed}, 200
 		except Exception as e:
