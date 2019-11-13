@@ -71,7 +71,14 @@ class GetSearchBorrowed(Resource):
 				page = 0
 
 			borrowed = []
-			for borrwed in db.borrowed.find(search).skip(limitFindBorrowed * page).limit(limitFindBorrowed).sort("_id"):
+			if search != {}:
+				# when search with param
+				result = db.borrowed.find(search).skip(limitFindBorrowed * page).limit(limitFindBorrowed).sort("_id")
+			else:
+				# when search is empty
+				result = db.borrowed.find().skip(limitFindBorrowed * page).limit(limitFindBorrowed).sort("_id")
+
+			for borrwed in result:
 				borrowed.append(convertDateForSeria(borrowed))
 
 			return {'borrowed': borrowed}, 200
