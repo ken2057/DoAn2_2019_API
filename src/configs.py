@@ -15,7 +15,7 @@ maxDateBorrow = 4
 limitBooks = 20
 
 # limit history per find
-limitBorrow = 20
+limitFindBorrowed = 20
 
 # max book can borrow
 maximumBookCanBorrow = 5

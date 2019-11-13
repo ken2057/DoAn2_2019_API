@@ -1,7 +1,7 @@
 # all the same import of api will be here
 from src.package import *
 # -----------------------------------------------------------------------------
-from src.configs import role, limitBorrow, roleHigherThanUser
+from src.configs import role, limitFindBorrowed, roleHigherThanUser, limitBooks
 from src.utils import getToken, getAccountWithId, convertDateForSeria, formatLog
 # -----------------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ class GetSearchBorrowed(Resource):
 				page = 0
 
 			borrowed = []
-			find = db.borrowed.find(search).skip(limitBooks * page).limit(limitBooks).sort("_id")
+			find = db.borrowed.find(search).skip(limitFindBorrowed * page).limit(limitFindBorrowed).sort("_id")
 
 			for borrwed in find:
 				borrowed.append(convertDateForSeria(borrowed))

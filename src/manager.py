@@ -1,7 +1,7 @@
 # all the same import of api will be here
 from src.package import *
 # -----------------------------------------------------------------------------
-from src.configs import role, limitBorrow, roleHigherThanUser
+from src.configs import role, limitFindBorrowed, roleHigherThanUser
 from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSeria, getBookWithId, formatLog
 # -----------------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ class GetBorrowed(Resource):
 				raise Exception('Not admin or manager: %s', token)
 			
 			borrowed = []
-			for i in db.borrowed.find({ "deleted" : { "$exists" : False } }).skip(page * limitBorrow).limit(limitBorrow).sort('date_borrow'):
+			for i in db.borrowed.find({ "deleted" : { "$exists" : False } }).skip(page * limitFindBorrowed).limit(limitFindBorrowed).sort('date_borrow'):
 				# convert datetime in history_status
 				newHS = []
 				for hs in i['history_status']:
