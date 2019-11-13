@@ -9,7 +9,7 @@ from src.admin import GetUsersInfo, SetAccountRole
 from src.manager import GetBorrowed, DeleteBook, EditBook, GetUserWithId, ActiveAccount
 from src.account import Login, SignUp, GetUserBorrowed, AccountInfo
 from src.subject import GetSubjects
-from src.borrowed import Borrowed
+from src.borrowed import Borrowed, GetSearchBorrowed
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
 # for develop
@@ -58,6 +58,7 @@ api.add_resource(GetSubjects, "/Subjects") # post
 
 # borrowed
 api.add_resource(Borrowed, "/Borrowed") # get/post
+api.add_resource(Borrowed, "/SearchBorrowed") # get
 
 if __name__ == "__main__":
   app.run()

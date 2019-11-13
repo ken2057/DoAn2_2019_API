@@ -35,7 +35,6 @@ class GetBorrowed(Resource):
 
 				borrowed.append(convertDateForSeria(i))
 
-
 			return { 'borrowed': borrowed }, 200
 
 		except Exception as e:
