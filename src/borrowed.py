@@ -80,7 +80,9 @@ class GetSearchBorrowed(Resource):
 
 			for borrwed in result:
 				logging.info('............................')	
-				borrowed.append(convertDateForSeria(borrowed))
+				t = convertDateForSeria(borrowed)
+				logging.info(t)
+				borrowed.append(t)
 			logging.info('------------------')	
 			logging.info(borrowed)
 
