@@ -174,7 +174,8 @@ class BorrowBook(Resource):
 				'bookId': int(json['bookId']),
 				'status': statusBorrow['wait_to_get'],
 				'date_borrow': now,
-				'date_expire': formatDate(calcBorrowExpireTime(now))
+				'date_expire': formatDate(calcBorrowExpireTime(now)),
+				'date_return': ""
 			}
 			# add new Order
 			account['borrowed'].append(copy(borrowInfo))
