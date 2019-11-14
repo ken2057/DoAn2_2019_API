@@ -127,37 +127,69 @@ class GetUserWithId(Resource):
 			logging.info('error getUserWithId: %s', e)
 		return 'Invalid', 400
 		
+# this route use for block/un-block or active/deactive account
+# block => user can't use that account any more
+# active => user can borrow book from library
 class ActiveAccount(Resource):
 	def post(self):
 		try:
 			# params
 			json = request.get_json()['json']
 			token = getToken(json['token'])
-			if token == None:
-				return 'Unauthorized', 401
-			
 			# check permission
-			if(token['role'] not in roleHigherThanUser):
-				raise Exception('Not permission to get user info: %s', token)
-			
+			if token == None or token['role'] not in roleHigherThanUser:
+				return 'Unauthorized', 401
+
 			# get account
 			account = getAccountWithId(json['username'])
 
 			# check if that account not admin
 			if account['role'] != 'admin':
-				active = True
-				if 'active' in account:
-					active = account['active']
-				# update book
+				update_account = {}
+				# get current stage of block/active of account
+				if 'active' in account and json['action'] == 'active':
+					update_account['active'] = not account['active']
+				elif 'blocked' in account and json['action'] == 'block':
+					update_account['blocked'] = not account['blocked']
+				else:
+					return 'none', 200
+
+				# update account
 				with client.start_session() as s:
 					with s.start_transaction():
 						u = db.account.update_one(
 							{'_id': account['_id']},
-							{'$set': {'active': not active}},
+							{'$set': update_account},
 							session = s
 						)
+
 			return 'done', 200
 
 		except Exception as e:
 			logging.info('error postActiveAccount: %s', e)
+		return 'Invalid', 400
+
+
+class AddBook(Resource):
+	def post(self):
+		try: 
+			# json = {'token', 'book' }
+			json = request.get_json()['json']
+			token = getToken(json['token'])
+			# check permission
+			if token == None or token['role'] not in roleHigherThanUser:
+				return 'Unauthorized', 401
+
+			book = json['book']
+			book['_id'] = db.bookTitle.find().count() + 1
+			book.pop('isbn')
+			
+			with client.start_session() as s:
+				with s.start_transaction():
+					i = db.bookTitle.insert_one(book)
+
+			return 'done', 200
+
+		except Exception as e:
+			logging.info('error postAddBook: %s', e)
 		return 'Invalid', 400

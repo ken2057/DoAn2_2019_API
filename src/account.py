@@ -2,8 +2,9 @@
 from src.package import *
 from uuid import uuid4
 # -----------------------------------------------------------------------------
-from src.configs import tokenExpireTime, role, maxDateAccount
+from src.configs import tokenExpireTime, role, maxDateAccount, minAge, maxAge
 from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria, getTokenWithUser, calcDateExpire
+from src.utils import formatDate, calcDateExpire
 # -----------------------------------------------------------------------------
 
 ## Login and return token
@@ -31,7 +32,12 @@ class Login(Resource):
 			ip = request.headers.get('X-Forwarded-For')
 
 			account = self.findUser(username, password)
-			if(account != None):
+			if account != None:
+				# if user have been blocked by admin or manager
+				# can't login
+				if 'blocked' in account and account['blocked']:
+					return 'Your account have been blocked', 403
+
 				# get old token if exist
 				result = getTokenWithUser(username)
 				if result != None:
@@ -56,10 +62,20 @@ class SignUp(Resource):
 			if db.account.find_one({'_id': json['username']}) != None:
 				return '', 409
 
-			if 'birth' not in json:
-				json['birth'] = ''
 			if 'address' not in json:
 				json['address'] = ''
+
+			# split to convert format from js to format can use
+			birth = json['birth'].split('T')[0].split('-')
+			# convert all to int
+			birth = [int(x) for x in birth]
+			# convert to GMT+7
+			json['birth'] = formatDate(datetime(birth[0], birth[1], birth[2]) + timedelta(days=1))
+
+			# check does user age is ok
+			temp = datetime.now().year - json['birth'].year
+			if temp not in range(minAge, maxAge + 1):
+				return 'Age much from ' + str(minAge) + ' to ' + str(maxAge), 400
 
 			# create new account
 			with client.start_session() as s:
@@ -74,10 +90,11 @@ class SignUp(Resource):
 							'birth': json['birth'],
 							'address': json['address'],
 							'account_point': 0,
-							'date_created': datetime.now(),
+							'date_created': formatDate(datetime.now()),
 							# based on the requirement, account only work for 6 months
-							'date_expire': calcDateExpire(maxDateAccount*24)[0],
-							'active': False
+							'date_expire': formatDate(calcDateExpire(maxDateAccount*24)[0]),
+							'active': False,
+							'blocked': False
 						}, session = s
 					)
 			return 'done', 200

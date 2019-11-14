@@ -29,6 +29,12 @@ maxDateAccount = 6*30 # day
 # max time hold book 'Get book from librarian'
 maxTimeHoldOrder = 12 #hours
 
+# min age
+minAge = 18
+
+# max age
+maxAge = 50
+
 # role in db
 #       0        1          2
 role = ['admin', 'manager', 'user']
