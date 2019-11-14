@@ -48,15 +48,12 @@ class EditBook(Resource):
 			# json will have: token, Obj(book)
 			json = request.get_json()['json']
 			token = getToken(json['token'])
-			if token == None:
+			# check user permission
+			if token == None or token['role'] not in roleHigherThanUser:
 				return 'Unauthorized', 401
 
 			bookNew = json['book']
 			bookOld = getBookWithId(bookNew['isbn'])
-
-			# if not have permission
-			if token['role'] not in roleHigherThanUser:
-				raise Exception('Delete book without permission: %s', token)
 			
 			# update
 			with client.start_session() as s:

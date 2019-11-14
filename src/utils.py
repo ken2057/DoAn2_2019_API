@@ -48,8 +48,8 @@ def calcTokenExprieTime():
 	# expires time = now + second
 	return datetime.now() + timedelta(seconds = tokenExpireTime)
 
-def calcDateExpire(time):
-	return datetime.now() + timedelta(hours = time),
+def calcDateExpire(timeAdd, time = datetime.now()):
+	return time + timedelta(hours = timeAdd),
 
 def calcBorrowExpireTime(now):
 	return now + timedelta(days = maxDateBorrow)
@@ -89,6 +89,9 @@ def run_convertDateForSeria(json):
 def getAccountWithId(accountId):
 	return db.account.find_one({'_id':accountId})
 
+def getBorrowedWithId(borrowedId):
+	return db.borrowed.find_one({'_id': borrowedId})
+
 ## Get book with id
 def getBookWithId(bookId):
 	return db.bookTitle.find_one({'_id':bookId, 'deleted': False})
@@ -98,7 +101,7 @@ def getBookWithId(bookId):
 # ------------------------------------------------------------------------------
 def formatLog(token, action, note):
 	return {
-		'time': getDateFormat(datetime.now()),
+		'time': formatDate(datetime.now()),
 		'username': token['username'], 
 		'role': token['role'], 
 		'action': action,

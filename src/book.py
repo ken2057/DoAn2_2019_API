@@ -76,8 +76,11 @@ class GetBook(Resource):
 			for borrow in db.borrowed.find({'_id': {'$in': listBorrwedId}}):
 				# if on hold
 				if borrow['status'] == 'Get book from librarian':
+					# get max time order will be keep
+					# by getting the time borrowed + maxTimeHoldOrder
+					timeHold = calcDateExpire(maxTimeHoldOrder, borrow['date_borrow'])[0]
 					# if time from start hold expired
-					if borrow['date_borrow'] < datetime.now():
+					if timeHold < datetime.now():
 						# remove hold request and break
 						self.removeHold(book, borrow['_id'])
 						break
@@ -174,7 +177,8 @@ class BorrowBook(Resource):
 				'bookId': int(json['bookId']),
 				'status': statusBorrow['wait_to_get'],
 				'date_borrow': now,
-				'date_expire': formatDate(calcBorrowExpireTime(now))
+				'date_expire': formatDate(calcBorrowExpireTime(now)),
+				'date_return': ''
 			}
 			# add new Order
 			account['borrowed'].append(copy(borrowInfo))
@@ -233,7 +237,8 @@ class IsBorrowedById(Resource):
 
 			# check if current user have been borrowed this book
 			for i in book['books']:
-				if flag and i == token['username']:
+				# if token not null and username- in string of borrowedId
+				if flag and token['username']+'-' in i:
 					# get all book on borrowed and order by user
 					for h in history:
 						if h['bookId'] == bookId and h['status'] in statusBorrow_block:

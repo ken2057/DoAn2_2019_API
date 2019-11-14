@@ -41,9 +41,10 @@ statusBorrow = {
     'order': 'Watting for avaialbe',
     'lost': 'Lost',
     'wait_to_get': 'Get book from librarian',
-    'paied': 'Paied',
+    'paid': 'Paid',
     'cancel': 'Canceled',
-    'hold_timeout': 'Hold order too long'
+    'hold_timeout': 'Hold order too long',
+    'finish_paid': 'Finish Paid'
 }
 
 # status when borrow book
@@ -56,6 +57,7 @@ statusBorrow_block = [
 # user point when return/cancel/lost book
 userPoint = {
     'return': 1,
+    'finish_paid': 1,
     'cancel': -2,
     'hold_timeout': -3,
     'lost': -3

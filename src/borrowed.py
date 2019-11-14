@@ -2,9 +2,9 @@
 from src.package import *
 # -----------------------------------------------------------------------------
 from src.configs import role, limitFindBorrowed, roleHigherThanUser, limitBooks
-from src.configs import feePerDay, statusBorrow, statusBorrow_block
+from src.configs import feePerDay, statusBorrow, statusBorrow_block, userPoint
 from src.utils import formatDate, formatHistoryStatus, formatLog
-from src.utils import getToken, getAccountWithId, getBookWithId
+from src.utils import getToken, getAccountWithId, getBookWithId, getBorrowedWithId
 from src.utils import convertDateForSeria
 # -----------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ class Borrowed(Resource):
 		try:
 			token = getToken(request.headers['Authorization'])
 			# id have bene replace - to / so when receive  borrowedId need change it back
-			borrowedId = request.args['borrowedId']
+			borrowedId = request.args['borrowedId'].replace('Lost: ', '') # in case of this book 'Lost'
 			username = borrowedId.split('-')[0]
 
 			# token expired
@@ -102,17 +102,16 @@ class GetSearchBorrowed(Resource):
 class UpdateBorrowed(Resource):
 	def post(self):
 		try:
-			# json will have bookId, status (return/lost)
 			json = request.get_json()['json']
 			token = getToken(json['token'])
 			if token == None or token['role'] not in roleHigherThanUser:
 				return 'Unauthorized', 401
 			
 			# get account, book from db, borrowed info
-			history_in_borrowed = db.borrowed.find_one({'_id': json['borrowedId']})
+			history_in_borrowed = getBorrowedWithId(json['borrowedId'])
 			book = getBookWithId(int(history_in_borrowed['bookId']))
 			account = getAccountWithId(history_in_borrowed['username'])
-
+			# get borrowed in account
 			borrowInfo = None
 			for h in account['borrowed']:
 				if h['_id'] == json['borrowedId']:
@@ -143,7 +142,7 @@ class UpdateBorrowed(Resource):
 			# if admin checked user losted the book
 			elif json['status'] == 'lost':
 				# if user lost the book
-				book['books'][index] = 'Lost by ' + token['username'] + ' - Date: ' + now.__str__()
+				book['books'][index] = 'Lost: ' + borrowInfo['_id']
 				# if lost => fee = money of book
 				fee = book['price']
 
@@ -152,9 +151,14 @@ class UpdateBorrowed(Resource):
 			#
 			borrowInfo['status'] = statusBorrow[json['status']]
 			h = formatHistoryStatus(borrowInfo['status'], now, token['username'])
+			history_in_borrowed['history_status'].append(h)
+
+			# if have fee added it to account and borrowed
+			insert = {'fee': fee, 'paid': 0 }
+			borrowInfo.update(insert)
 
 			account['borrowed'].append(borrowInfo)
-			history_in_borrowed['history_status'].append(h)
+
 			# update declare
 			update_account = {'borrowed': account['borrowed']}
 			if 'account_point' in account and json['status'] != 'cancel':
@@ -163,13 +167,10 @@ class UpdateBorrowed(Resource):
 			update_borrowed = {
 				'history_status': history_in_borrowed['history_status'], 
 				'status': borrowInfo['status'], 
-				'date_return': borrowInfo['date_return']
+				'date_return': borrowInfo['date_return'],
+				'fee': fee,
+				'paid': 0
 			}
-			# if have fee added it to account and borrowed
-			if (fee != 0):
-				insert = {'fee': fee, 'paid': 0 }
-				update_account.update(insert)
-				update_borrowed.update(insert)
 
 			#
 			# update db
@@ -178,7 +179,7 @@ class UpdateBorrowed(Resource):
 				with s.start_transaction():
 					# update in Account
 					u = db.account.update_one(
-						{'_id': token['username']},
+						{'_id': account['_id']},
 						{'$set': update_account },
 						session=s
 					)
@@ -200,3 +201,88 @@ class UpdateBorrowed(Resource):
 		except Exception as e:
 			logging.info('error updateBorrowed: %s', e)
 		return 'Invalid', 400
+
+class PayFee(Resource):
+	def post(self):
+		try: 
+			# json = {'token', 'borrowedId', 'pay' }
+			json = request.get_json()['json']
+			token = getToken(json['token'])
+			# check permission
+			if token == None or token['role'] not in roleHigherThanUser:
+				return 'Unauthorized', 401
+
+			# get account from db, borrowed info
+			history_in_borrowed = getBorrowedWithId(json['borrowedId'])
+			account = getAccountWithId(history_in_borrowed['username'])
+			# get borrowed in account
+			borrowInfo = None
+			for h in account['borrowed']:
+				if h['_id'] == json['borrowedId']:
+					borrowInfo = h
+					break
+			else:
+				return 'Not exists', 400
+
+			#
+			# remove previous borrowed info
+			#
+			account['borrowed'].remove(borrowInfo)
+
+			now = formatDate(datetime.now())
+			# calc fee and paid
+			pay = int(json['pay']) 
+			paid = int(history_in_borrowed['paid'] | 0)
+			fee = int(history_in_borrowed['fee'])
+
+			point = 0
+			if (pay + paid == fee):
+				borrowInfo['status'] = statusBorrow['finish_paid']
+				borrowInfo['paid'] = pay + paid
+				point = userPoint['finish_paid']
+			else:
+				borrowInfo['status'] = statusBorrow['paid'] + ' ' + pay.__str__()
+				borrowInfo['paid'] = pay + paid
+
+			#
+			# update borrowed info
+			#
+			h = formatHistoryStatus(borrowInfo['status'], now, token['username'])
+			history_in_borrowed['history_status'].append(h)
+
+			account['borrowed'].append(borrowInfo)
+			# update declare
+			update_account = {'borrowed': account['borrowed']}
+			if 'account_point' in account:
+				update_account['account_point'] = account['account_point'] + point
+
+			update_borrowed = {
+				'history_status': history_in_borrowed['history_status'], 
+				'status': borrowInfo['status'],
+				'paid': borrowInfo['paid']
+			}
+
+			#
+			# update db
+			#
+			with client.start_session() as s:
+				with s.start_transaction():
+					# update in Account
+					u = db.account.update_one(
+						{'_id': token['username']},
+						{'$set': update_account },
+						session=s
+					)
+					# update in Borrowed
+					u = db.borrowed.update_one(
+						{'_id': borrowInfo['_id']},
+						{'$set': update_borrowed},
+						session=s
+					)
+
+			return 'done', 200
+
+		except Exception as e:
+			logging.info('error updateBorrowed: %s', e)
+		return 'Invalid', 400
+
