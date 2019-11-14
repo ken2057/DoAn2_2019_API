@@ -161,9 +161,9 @@ class UpdateBorrowed(Resource):
 
 			# update declare
 			update_account = {'borrowed': account['borrowed']}
-			if 'account_point' in account and json['status'] != 'cancel':
+			if 'account_point' in account and json['status'] not in ['cancel', 'sent']:
 				update_account['account_point'] = account['account_point'] + userPoint[json['status']]
-
+			
 			update_borrowed = {
 				'history_status': history_in_borrowed['history_status'], 
 				'status': borrowInfo['status'], 
@@ -171,7 +171,7 @@ class UpdateBorrowed(Resource):
 				'fee': fee,
 				'paid': 0
 			}
-
+			
 			#
 			# update db
 			#
@@ -283,6 +283,6 @@ class PayFee(Resource):
 			return 'done', 200
 
 		except Exception as e:
-			logging.info('error updateBorrowed: %s', e)
+			logging.info('error payFee: %s', e)
 		return 'Invalid', 400
 
