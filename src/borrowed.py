@@ -19,7 +19,7 @@ class Borrowed(Resource):
 
 			# token expired
 			# check if user is admin or is that exact user who borrowed the book
-			if token == None or token['role'] not in roleHigherThanUser:
+			if token == None or not (token['role'] in roleHigherThanUser or token['username'] == username): 
 				return 'Unauthorized', 401
 
 			result = db.borrowed.find_one({'_id': borrowedId})
