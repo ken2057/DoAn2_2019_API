@@ -71,6 +71,9 @@ class GetBook(Resource):
 		try:
 			book = getBookWithId(bookId)
 
+			if book == None:
+				return 'Not found', 400
+
 			# check if any 'Get book from librarian' expire
 			listBorrwedId = [x for x in book['books'] if x != '']
 			for borrow in db.borrowed.find({'_id': {'$in': listBorrwedId}}):

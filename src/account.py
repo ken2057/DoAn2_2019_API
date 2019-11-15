@@ -60,7 +60,7 @@ class SignUp(Resource):
 			json = request.json['user']
 
 			if db.account.find_one({'_id': json['username']}) != None:
-				return '', 409
+				return 'Username already exist', 409
 
 			if 'address' not in json:
 				json['address'] = ''
