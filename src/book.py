@@ -166,7 +166,7 @@ class BorrowBook(Resource):
 			book = getBookWithId(int(json['bookId']))
 			# if user already borrow this book, he/she can't borrow the second
 			
-			if token['username'] in book['books']:
+			if token['username'] in [x.split('-')[0] for x in book['books'] if x != '']:
 				return "Can't borrow 2 same book", 400
 			# if book not avaiable
 			if '' not in book['books']:
@@ -250,9 +250,9 @@ class IsBorrowedById(Resource):
 						return {'status': 'Your account have been expired'}, 200
 
 			# check if current user have been borrowed this book
-			for i in [x for x in book['books'] if x != '']:
+			for i in book['books']:
 				# if token not null and user not borrowed the book
-				if flag and token['username'] == i.split()[0]:
+				if flag and token['username'] == i.split('-')[0]:
 					# get all book on borrowed and order by user
 					for h in history:
 						if h['bookId'] == bookId and h['status'] in statusBorrow_block:

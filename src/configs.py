@@ -58,6 +58,7 @@ statusBorrow = {
 
 # status when borrow book
 statusBorrow_block = [
+    'Paid',
     'On borrowing',
     'Watting for avaialbe',
     'Get book from librarian'
