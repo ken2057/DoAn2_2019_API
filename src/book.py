@@ -171,8 +171,12 @@ class BorrowBook(Resource):
 			# if book not avaiable
 			if '' not in book['books']:
 				return 'Out of order', 400
-			if (account['date_expire'] - datetime.now()).days < 0:
+			# check date expire
+			if 'date_expire' in account and (account['date_expire'] - datetime.now()).days < 0:
 				return 'Your account have been expired', 400
+			# check userpoint
+			if 'account_point' in account and account['account_point'] <= minAccountPoint:
+				return 'Your account have been blocked', 400
 
 			
 			# some varibles
@@ -235,13 +239,15 @@ class IsBorrowedById(Resource):
 				history = account['borrowed']
 				# if account not active by manager or admin
 				# => it can't borrow the book
-				if 'active' in account and not account['active']:
-					return {'status': 'Your account is not active, contact the manager'}, 200
-				# check if account_point <= -10 => block user from borrow
-				if 'account_point' in account and account['account_point'] <= minAccountPoint:
-					return {'status': 'You have been blocked from borrow book'}, 200
-				if (account['date_expire'] - datetime.now()).days < 0:
-					return {'status': 'Your account have been expired'}, 200
+				if(token['role'] != 'admin'):
+					# check if account_point <= -10 => block user from borrow
+					if 'account_point' in account and account['account_point'] <= minAccountPoint:
+						return {'status': 'You have been blocked from borrow book'}, 200
+					# check account active
+					if 'active' in account and not account['active']:
+						return {'status': 'Your account is not active, contact the manager'}, 200
+					if (account['date_expire'] - datetime.now()).days < 0:
+						return {'status': 'Your account have been expired'}, 200
 
 			# check if current user have been borrowed this book
 			for i in book['books']:
