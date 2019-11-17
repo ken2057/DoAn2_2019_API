@@ -251,8 +251,8 @@ class IsBorrowedById(Resource):
 
 			# check if current user have been borrowed this book
 			for i in book['books']:
-				# if token not null and username- in string of borrowedId
-				if flag and token['username']+'-' in i:
+				# if token not null and user not borrowed the book
+				if flag and token['username'] == i.split()[0]:
 					# get all book on borrowed and order by user
 					for h in history:
 						if h['bookId'] == bookId and h['status'] in statusBorrow_block:
