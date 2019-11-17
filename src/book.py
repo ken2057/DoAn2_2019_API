@@ -246,7 +246,7 @@ class IsBorrowedById(Resource):
 					# check account active
 					if 'active' in account and not account['active']:
 						return {'status': 'Your account is not active, contact the manager'}, 200
-					if (account['date_expire'] - datetime.now()).days < 0:
+					if 'date_expire' in account and (account['date_expire'] - datetime.now()).days < 0:
 						return {'status': 'Your account have been expired'}, 200
 
 			# check if current user have been borrowed this book
