@@ -250,7 +250,7 @@ class IsBorrowedById(Resource):
 						return {'status': 'Your account have been expired'}, 200
 
 			# check if current user have been borrowed this book
-			for i in book['books']:
+			for i in [x for x in book['books'] if x != '']:
 				# if token not null and user not borrowed the book
 				if flag and token['username'] == i.split()[0]:
 					# get all book on borrowed and order by user
