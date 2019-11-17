@@ -3,7 +3,7 @@ from src.package import *
 from uuid import uuid4
 # -----------------------------------------------------------------------------
 from src.configs import tokenExpireTime, role, maxDateAccount, minAge, maxAge
-from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria, getTokenWithUser, calcDateExpire
+from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria, getTokenWithUser
 from src.utils import formatDate, calcDateExpire
 # -----------------------------------------------------------------------------
 
@@ -136,6 +136,10 @@ class AccountInfo(Resource):
 				account.pop('account_point')
 
 			account = convertDateForSeria(account)
+			# remove time from datetime
+			account['birth'] = convertDateForSeria(account['birth']).split(' ')[0]
+			account['date_expire'] = convertDateForSeria(account['date_expire']).split(' ')[0]
+			account['date_created'] = convertDateForSeria(account['date_created']).split(' ')[0]
 
 			return {'account': account}, 200
 

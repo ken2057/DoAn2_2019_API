@@ -134,8 +134,17 @@ else:
             {'status': 'On borrowing', 'date': datetime.now()}
         ]
         # borrowed
+        # create temp borrowed collection
         try:
             db.borrowed.insert_one({'deleted': True})
+
+        except Exception as e:
+            print(e)
+
+        # log
+        # create temp log collection
+        try:
+            db.log.insert_one({'deleted': True})
 
         except Exception as e:
             print(e)

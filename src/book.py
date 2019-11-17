@@ -3,7 +3,7 @@ from src.package import *
 import re
 from copy import copy
 # ------------------------------------------------------------------------------
-from src.configs import limitBooks, statusBorrow, statusBorrow_block
+from src.configs import limitBooks, statusBorrow, statusBorrow_block, minAccountPoint
 from src.configs import maximumBookCanBorrow, maxTimeHoldOrder, userPoint
 from src.utils import isJsonValid, getToken, calcBorrowExpireTime, calcDateExpire
 from src.utils import getAccountWithId, getBookWithId, formatDate, formatHistoryStatus
@@ -171,6 +171,9 @@ class BorrowBook(Resource):
 			# if book not avaiable
 			if '' not in book['books']:
 				return 'Out of order', 400
+			if (account['date_expire'] - datetime.now()).days < 0:
+				return 'Your account have been expired', 400
+
 			
 			# some varibles
 			now = formatDate(datetime.now())
@@ -235,8 +238,10 @@ class IsBorrowedById(Resource):
 				if 'active' in account and not account['active']:
 					return {'status': 'Your account is not active, contact the manager'}, 200
 				# check if account_point <= -10 => block user from borrow
-				if 'account_point' in account and account['account_point'] <= -10:
+				if 'account_point' in account and account['account_point'] <= minAccountPoint:
 					return {'status': 'You have been blocked from borrow book'}, 200
+				if (account['date_expire'] - datetime.now()).days < 0:
+					return {'status': 'Your account have been expired'}, 200
 
 			# check if current user have been borrowed this book
 			for i in book['books']:

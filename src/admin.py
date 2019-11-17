@@ -2,7 +2,7 @@
 from src.package import *
 # -----------------------------------------------------------------------------
 from src.configs import role
-from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSeria
+from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSeria, formatDate
 # -----------------------------------------------------------------------------
 
 class GetUsersInfo(Resource):
@@ -23,7 +23,7 @@ class GetUsersInfo(Resource):
 				user['borrowed'] = convertDateForSeria(user['borrowed'])
 				#
 				if 'birth' in user:
-					user['birth'] = convertDateForSeria(user['birth']) 
+					user['birth'] = convertDateForSeria(user['birth']).split(' ')[0]
 				else:
 					user['birth'] = ''
 				#

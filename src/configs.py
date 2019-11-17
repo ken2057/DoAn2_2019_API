@@ -5,6 +5,9 @@ mongodb = 'mongodb+srv://libary:3AvmVMAqu2Xs2v1n@cluster0-uuoo5.gcp.mongodb.net/
 client = MongoClient(mongodb)
 db = client.library
 
+# minimum accout point
+minAccountPoint = -10
+
 # token expire time
 tokenExpireTime = 300 #seconds
 
