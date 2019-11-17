@@ -137,9 +137,12 @@ class AccountInfo(Resource):
 
 			account = convertDateForSeria(account)
 			# remove time from datetime
-			account['birth'] = convertDateForSeria(account['birth']).split(' ')[0]
-			account['date_expire'] = convertDateForSeria(account['date_expire']).split(' ')[0]
-			account['date_created'] = convertDateForSeria(account['date_created']).split(' ')[0]
+			if 'birth' in account:
+				account['birth'] = convertDateForSeria(account['birth']).split(' ')[0]
+			if 'date_expire' in account:
+				account['date_expire'] = convertDateForSeria(account['date_expire']).split(' ')[0]
+			if 'date_created' in account:
+				account['date_created'] = convertDateForSeria(account['date_created']).split(' ')[0]
 
 			return {'account': account}, 200
 
