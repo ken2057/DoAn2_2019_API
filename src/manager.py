@@ -170,11 +170,11 @@ class ActiveAccount(Resource):
 							session = s
 						)
 						# action name
-						if 'blocked' in update_account and update_account['block']:
+						if 'blocked' in update_account and update_account['blocked']:
 							action = 'block account'
 						elif 'blocked' in update_account:
 							action = 'un-block account'
-						if 'active' in update_account and update_account['block']:
+						if 'active' in update_account and update_account['active']:
 							action = 'active account'
 						else:
 							action = 'deactive account'
