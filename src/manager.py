@@ -174,7 +174,7 @@ class ActiveAccount(Resource):
 							action = 'block account'
 						elif json['action'] == 'block':
 							action = 'un-block account'
-						if json['action'] == 'active' and update_account['active']:
+						elif json['action'] == 'active' and update_account['active']:
 							action = 'active account'
 						else:
 							action = 'deactive account'
