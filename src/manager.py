@@ -121,6 +121,13 @@ class GetUserWithId(Resource):
 			user = convertDateForSeria(user)
 			user.pop('password')
 
+			if 'birth' in user:
+				user['birth'] = convertDateForSeria(user['birth']).split(' ')[0]
+			if 'date_created' in user:
+				user['date_created'] = convertDateForSeria(user['date_created']).split(' ')[0]
+			if 'date_expire' in user:
+				user['date_expire'] = convertDateForSeria(user['date_expire']).split(' ')[0]
+
 			return {'user': user}, 200
 
 		except Exception as e:

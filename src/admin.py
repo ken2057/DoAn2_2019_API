@@ -29,12 +29,12 @@ class GetUsersInfo(Resource):
 					user['birth'] = ''
 				#
 				if 'date_created' in user:
-					user['date_created'] = convertDateForSeria(user['date_created']) 
+					user['date_created'] = convertDateForSeria(user['date_created']).split(' ')[0]
 				else:
 					user['date_created'] = ''
 				#
 				if 'date_expire' in user:
-					user['date_expire'] = convertDateForSeria(user['date_expire']) 
+					user['date_expire'] = convertDateForSeria(user['date_expire']).split(' ')[0]
 				else:
 					user['date_expire'] = ''
 				# remove some unnecessary infomartion
