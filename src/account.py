@@ -4,7 +4,7 @@ from uuid import uuid4
 # -----------------------------------------------------------------------------
 from src.configs import tokenExpireTime, role, maxDateAccount, minAge, maxAge
 from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria, getTokenWithUser
-from src.utils import formatDate, calcDateExpire
+from src.utils import formatDate, calcDateExpire, formatLog
 # -----------------------------------------------------------------------------
 
 ## Login and return token
@@ -162,7 +162,8 @@ class AccountInfo(Resource):
 			# if not match username in token and user in
 			# or token is a admin
 			if user['username'] != token['username'] and token['role'] != 'admin':
-				raise Exception('Json and token username not match: %s', json)
+				return 'Json and token username not match', 407
+
 			# set
 			newInfo = {}
 			if user['password'] != '':
@@ -173,15 +174,24 @@ class AccountInfo(Resource):
 				newInfo['address'] = user['address']	
 			if 'birth' in user:
 				newInfo['birth'] = user['birth']
-				
+			# account to check admin and write log
+			account = None
 			# if admin edit account
 			if token['role'] == 'admin':
+				account = getAccountWithId(user['username'])
 				newInfo['role'] = user['role']
 
 			# update
 			with client.start_session() as s:
 				with s.start_transaction():
 					u = db.account.update_one({'_id': user['username']}, {'$set': newInfo}, session=s)
+					if account != None:
+						note = {
+							'username': user['username'],
+							'old_role': account['role'],
+							'new_role': user['role']
+						}
+						db.logging.insert_one(formatLog(token, 'change role', note))
 			return 'done', 200
 		except Exception as e:
 			logging.info('error postAccountinfo: %s', e)

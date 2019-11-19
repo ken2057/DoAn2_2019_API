@@ -3,6 +3,7 @@ from src.package import *
 # -----------------------------------------------------------------------------
 from src.configs import role
 from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSeria, formatDate
+from src.utils import formatLog
 # -----------------------------------------------------------------------------
 
 class GetUsersInfo(Resource):
@@ -63,12 +64,18 @@ class SetAccountRole(Resource):
 			account = getAccountWithId(json['accountId'])
 			# account is admin ? => return false
 			if account['role'] == 'admin':
-				raise Exception("Account is admin, can't change")
+				return "Can't change admin role", 400
 			
 			# update role
 			with client.start_session() as s:
 				with s.start_transaction():
 					u = db.account.update_one({'_id': json['accountId']}, { '$set': {'role': json['role']}}, session=s)
+					note = {
+						'username': account['_id'],
+						'old_role': account['role'],
+						'new_role': json['role']
+					}
+					db.logging.insert_one(formatLog(token, 'change role', note))
 
 		except Exception as e:
 			logging.info('error setAccountRole: %s', e)
