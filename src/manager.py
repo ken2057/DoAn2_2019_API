@@ -162,6 +162,10 @@ class ActiveAccount(Resource):
 							{'$set': update_account},
 							session = s
 						)
+						note = {
+							'account_activated': account['_id']
+						}
+						db.logging.insert_one(formatLog(token, 'active account', note))
 
 			return 'done', 200
 
