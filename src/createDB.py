@@ -143,11 +143,11 @@ else:
 
         # log
         # create temp log collection
-        # try:
-        #     db.log.insert_one({'deleted': True})
+        try:
+            db.log.insert_one({'deleted': True})
 
-        # except Exception as e:
-        #     print(e)
+        except Exception as e:
+            print(e)
 
         # subject
         try:

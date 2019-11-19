@@ -191,7 +191,7 @@ class AccountInfo(Resource):
 							'old_role': account['role'],
 							'new_role': user['role']
 						}
-						db.logging.insert_one(formatLog(token, 'change role', note))
+						i = db.log.insert_one(formatLog(token, 'change role', note), session)
 			return 'done', 200
 		except Exception as e:
 			logging.info('error postAccountinfo: %s', e)

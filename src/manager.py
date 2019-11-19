@@ -71,7 +71,7 @@ class EditBook(Resource):
 						'publisher': bookNew['publisher'],
 						'price': bookNew['price']
 						}, session=s)
-					db.logging.insert_one(formatLog(token, 'insert book', {'old':bookOld, 'new':bookNew}))
+					i = db.log.insert_one(formatLog(token, 'insert book', {'old':bookOld, 'new':bookNew}), session=s)
 			return 'done', 200
 
 		except Exception as e:
@@ -183,7 +183,7 @@ class ActiveAccount(Resource):
 							'account': account['_id']
 						}
 						# add to log
-						db.logging.insert_one(formatLog(token, action, note))
+						i = db.log.insert_one(formatLog(token, action, note), session=s)
 
 			return 'done', 200
 
@@ -209,6 +209,7 @@ class AddBook(Resource):
 			with client.start_session() as s:
 				with s.start_transaction():
 					i = db.bookTitle.insert_one(book)
+					i = db.log.insert_one(formatLog(token, 'add book', {'bookId':book['_id']}), session=s)
 
 			return 'done', 200
 
