@@ -169,10 +169,16 @@ class ActiveAccount(Resource):
 							{'$set': update_account},
 							session = s
 						)
+						# action name
+						action = 'active account'
+						if not update_account['active']:
+							action = 'deactive account'
+						# some note
 						note = {
-							'account_activated': account['_id']
+							'account': account['_id']
 						}
-						db.logging.insert_one(formatLog(token, 'active account', note))
+						# add to log
+						db.logging.insert_one(formatLog(token, action, note))
 
 			return 'done', 200
 
