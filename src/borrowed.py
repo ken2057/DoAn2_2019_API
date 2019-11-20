@@ -127,7 +127,8 @@ class UpdateBorrowed(Resource):
 			account['borrowed'].remove(borrowInfo)
 
 			fee = 0
-			now = formatDate(datetime.now())
+			# convert to GMT+7
+			now = formatDate(datetime.now() + timedelta(hours=7))
 			# if user return book or cancel order
 			# cancel can be call user/admin
 			if json['status'] == 'cancel':
@@ -229,7 +230,8 @@ class PayFee(Resource):
 			#
 			account['borrowed'].remove(borrowInfo)
 
-			now = formatDate(datetime.now())
+			# convert to GMT+7
+			now = formatDate(datetime.now() + timedelta(hours=7))
 			# calc fee and paid
 			pay = int(json['pay']) 
 			paid = int(history_in_borrowed['paid'] | 0)

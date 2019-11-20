@@ -38,7 +38,7 @@ class GetBook(Resource):
 		if 'account_point' in account:			
 			update_one['account_point'] = account['account_point'] + userPoint['hold_timeout']
 
-		now = formatDate(datetime.now())
+		now = formatDate(datetime.now() + timedelta(hours=7))
 		h = formatHistoryStatus(statusBorrow['hold_timeout'], now, 'system')
 		borrowed['history_status'].append(h)
 		
@@ -181,9 +181,10 @@ class BorrowBook(Resource):
 			if 'account_point' in account and account['account_point'] <= minAccountPoint:
 				return 'Your account have been blocked', 400
 
-			
 			# some varibles
-			now = formatDate(datetime.now())
+			# convert to GMT+7
+			now = formatDate(datetime.now() + timedelta(hours=7))
+
 			borrowInfo = {
 				'_id': token['username'] + '-' + json['bookId'] + '-' + now.__str__(),
 				'username': token['username'],
@@ -304,7 +305,8 @@ class CancelBookOrder(Resource):
 				{'_id': borrowInfo['_id']}
 			)
 			
-			now = formatDate(datetime.now())
+			# convert to GMT+7
+			now = formatDate(datetime.now() + timedelta(hours=7))
 			# if user return book or cancel order
 			# cancel can be call user/admin
 			if account['_id'] == token['username']:

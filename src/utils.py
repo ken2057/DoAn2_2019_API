@@ -101,7 +101,7 @@ def getBookWithId(bookId):
 # ------------------------------------------------------------------------------
 def formatLog(token, action, note):
 	return {
-		'time': formatDate(datetime.now()),
+		'time': formatDate(datetime.now() + timedelta(hours=7)), # convert to GMT+7
 		'username': token['username'], 
 		'role': token['role'], 
 		'action': action,
