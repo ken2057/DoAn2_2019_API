@@ -72,12 +72,9 @@ class GetSearchBorrowed(Resource):
 				page = 0
 
 			borrowed = []
-			if search != {}:
-				# when search with param
-				result = db.borrowed.find(search).skip(limitFindBorrowed * page).limit(limitFindBorrowed).sort("_id")
-			else:
-				# when search is empty
-				result = db.borrowed.find().skip(limitFindBorrowed * page).limit(limitFindBorrowed).sort("_id")
+			result = db.borrowed.find(search).skip(limitFindBorrowed * page).limit(limitFindBorrowed).sort("_id")
+			# get total of documents in collection
+			total = db.borrowed.find(search).count()
 
 			for i in result:
 				if 'deleted' in i and i['deleted']:
@@ -92,8 +89,11 @@ class GetSearchBorrowed(Resource):
 				i['_id'] = i['_id'].__str__()
 				
 				borrowed.append(convertDateForSeria(i))
+			
+			#get total of document in collection
+			total = db.borrowed.find(search).count()
 
-			return {'borrowed': borrowed}, 200
+			return {'borrowed': borrowed, 'total': total}, 200
 		except Exception as e:
 			logging.info('error searchBorrowed: %s', e)
 		return 'Invalid', 400

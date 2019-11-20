@@ -1,3 +1,4 @@
+import re
 # all the same import of api will be here
 from src.package import *
 # -----------------------------------------------------------------------------
@@ -6,16 +7,22 @@ from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSer
 from src.utils import formatLog
 # -----------------------------------------------------------------------------
 
+# get all user into
 class GetUsersInfo(Resource):
 	def get(self):
 		try:
 			token = getToken(request.headers['Authorization'])
+			username = request.args['username']
+			search = {}
+			if username == "":
+				search['_id'] = re.compile(username, re.IGNORECASE)
+
 			# token expired or not admin
 			if token == None or token['role'] != role[0]:
 				return 'Unauthorized', 401
 			# get all user info
 			users = []
-			for user in db.account.find().sort([('role', 1), ('_id', 1)]):
+			for user in db.account.find(search).sort([('role', 1), ('_id', 1)]):
 				if 'email' not in user:
 					user['email'] = ''
 				if 'address' not in user:
@@ -42,7 +49,10 @@ class GetUsersInfo(Resource):
 				#
 				users.append(user)
 
-			return {'users': users}, 200
+			# get total of documents in collection
+			total = db.account.find(search).count()
+
+			return {'users': users, 'total': total}, 200
 				
 		except Exception as e:
 			logging.info('error GetAllUserInfo: %s',e)

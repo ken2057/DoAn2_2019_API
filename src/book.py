@@ -1,7 +1,7 @@
 # all the same import of api will be here
 from src.package import *
-import re
 from copy import copy
+import re
 # ------------------------------------------------------------------------------
 from src.configs import limitBooks, statusBorrow, statusBorrow_block, minAccountPoint
 from src.configs import maximumBookCanBorrow, maxTimeHoldOrder, userPoint
@@ -133,7 +133,10 @@ class GetSearchBook(Resource):
 			for book in find:
 				books.append(book)
 
-			return {'books': books}, 200
+			# get total of documents in collection
+			total = db.bookTitle.find(search).count()
+
+			return {'books': books, 'total': total}, 200
 		except Exception as e:
 			logging.info('error searchBook: %s', e)
 		return 'Invalid', 400
