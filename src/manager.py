@@ -1,5 +1,6 @@
 # all the same import of api will be here
 from src.package import *
+import json
 # -----------------------------------------------------------------------------
 from src.configs import role, limitFindBorrowed, roleHigherThanUser
 from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSeria, getBookWithId, formatLog
@@ -215,4 +216,25 @@ class AddBook(Resource):
 
 		except Exception as e:
 			logging.info('error postAddBook: %s', e)
+		return 'Invalid', 400
+
+	
+class Configs(Resource):
+	def get(self):
+		try:
+			token = getToken(request.headers['Authorization'])
+			# token expired or not admin
+			if token == None or token['role'] not in roleHigherThanUser:
+				return 'Unauthorized', 401
+
+			results = db.config.find()
+			configs = {}
+			
+			for r in results:
+				configs[r['_id']] = r['value']
+				
+			return {'configs': configs}, 200
+
+		except Exception as e:
+			logging.info('error getConfig: %s', e)
 		return 'Invalid', 400

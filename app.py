@@ -6,9 +6,9 @@ import logging
 from src.book import GetBook, GetSearchBook, BorrowBook, IsBorrowedById, CancelBookOrder
 from src.auth import GetPermission, IsTokenExpire, Logout
 from src.admin import GetUsersInfo, SetAccountRole
-from src.manager import GetBorrowed, DeleteBook, EditBook, GetUserWithId, ActiveAccount, AddBook
+from src.manager import GetBorrowed, DeleteBook, EditBook, GetUserWithId, ActiveAccount, AddBook, Configs
 from src.account import Login, SignUp, GetUserBorrowed, AccountInfo
-from src.subject import GetSubjects
+from src.subject import Subjects
 from src.borrowed import Borrowed, GetSearchBorrowed, UpdateBorrowed, PayFee
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
@@ -53,9 +53,10 @@ api.add_resource(DeleteBook, "/Manager/DeleteBook") # post
 api.add_resource(EditBook, "/Manager/EditBook") # post
 api.add_resource(AddBook, "/Manager/AddBook") # post
 api.add_resource(ActiveAccount, "/Manager/ActiveAccount") # post
+api.add_resource(Configs, "/Manager/Config") # get/post
 
 # subject
-api.add_resource(GetSubjects, "/Subjects") # post
+api.add_resource(Subjects, "/Subjects") # post
 
 # borrowed
 api.add_resource(Borrowed, "/Borrowed") # get/post
