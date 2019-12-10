@@ -29,13 +29,32 @@ class Subjects(Resource):
 			with client.start_session() as s:
 				with s.start_transaction():
 					if json['action'] in ['add', 'edit']:
-						# check exists subject._id
+						# check exists subject._id and method is add/edit
 						subjects = db.subject.find()
 						for sub in subjects:
 							if sub['_id'].lower() == json['subjectName']:
 								message = 'Already exist Subject name "' + json['subjectName'] +'"'
 								return message, 400
+					else:
+						# delete subject in subject doc
+						d = db.subject.delete_one({'_id': json['subjectName']})
 
+						# delete subject in book
+						books = db.bookTitle.find({'subjects': {'$elemMatch': {'$eq': json['subjectName']}}})
+						list_books = []
+						for b in books:
+							list_books.append(b['_id'])
+							b['subjects'].remove(json['subjectName'])
+							d = db.bookTitle.update_one({'_id': b['_id']}, { '$set': {'subjects': b['subjects']}}, session=s)
+
+						# add log
+						note = {
+							'subject': json['subjectName'],
+							'affect_books': list_books
+						}
+						db.logging.insert_one(formatLog(token, 'delete subject', note))
+
+					# add or edit subject
 					if json['action'] == 'add':
 						# insert
 						i = db.subject.insert_one({'_id': json['subjectName']}, session=s)
@@ -62,26 +81,7 @@ class Subjects(Resource):
 							'newSubject': json['subjectName'],
 						}
 						db.logging.insert_one(formatLog(token, 'edit subject', note))
-					else: # delete subject
-						# delete subject in subject doc
-						d = db.subject.delete_one({'_id': json['subjectName']})
-
-						# delete subject in book
-						books = db.bookTitle.find({'subjects': {'$elemMatch': {'$eq': json['subjectName']}}})
-						list_books = []
-						for b in books:
-							list_books.append(b['_id'])
-							b['subjects'].remove(json['subjectName'])
-							d = db.bookTitle.update_one({'_id': b['_id']}, { '$set': {'subjects': b['subjects']}}, session=s)
-
-						# add log
-						note = {
-							'subject': json['subjectName'],
-							'affect_books': list_books
-						}
-						db.logging.insert_one(formatLog(token, 'delete subject', note))
 						
-
 			return 'done', 200
 			
 		except Exception as e:
