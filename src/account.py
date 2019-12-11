@@ -87,6 +87,7 @@ class SignUp(Resource):
 							'email': json['email'], 
 							'role': 'user', 
 							'borrowed': [],
+							'user_type': 'X',
 							'birth': json['birth'],
 							'address': json['address'],
 							'account_point': 0,

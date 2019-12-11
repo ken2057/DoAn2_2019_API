@@ -45,7 +45,7 @@ class GetBook(Resource):
 		# start session to remove the hold
 		with client.start_session() as s:
 			with s.start_transaction():
-				u = db.bookTitle.update_one(
+				u = db.book.update_one(
 					{'_id': book['_id']},
 					{'$set': {'books': book['books']}},
 					session = s
@@ -127,14 +127,14 @@ class GetSearchBook(Resource):
 
 		books = []
 		try:
-			find = db.bookTitle.find(search).skip(
+			find = db.book.find(search).skip(
 				limitBooks * page).limit(limitBooks).sort("_id")
 
 			for book in find:
 				books.append(book)
 
 			# get total of documents in collection
-			total = db.bookTitle.find(search).count()
+			total = db.book.find(search).count()
 
 			return {'books': books, 'total': total}, 200
 		except Exception as e:
@@ -209,7 +209,7 @@ class BorrowBook(Resource):
 			#
 			with client.start_session() as s:
 				with s.start_transaction():
-					u = db.bookTitle.update_one(
+					u = db.book.update_one(
 						{'_id': int(json['bookId'])},
 						{'$set': {'books': book['books']}},
 						session=s
@@ -352,7 +352,7 @@ class CancelBookOrder(Resource):
 						session=s
 					)
 					# update in bookTitle
-					u = db.bookTitle.update_one(
+					u = db.book.update_one(
 						{'_id': int(json['bookId'])},
 						{'$set': {'books': book['books']}},
 						session=s

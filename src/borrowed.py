@@ -191,7 +191,7 @@ class UpdateBorrowed(Resource):
 						session=s
 					)
 					# update in bookTitle
-					u = db.bookTitle.update_one(
+					u = db.book.update_one(
 						{'_id': int(history_in_borrowed['bookId'])},
 						{'$set': {'books': book['books']}},
 						session=s

@@ -21,6 +21,9 @@ maxDateAccount = 6*30 # day
 # max time hold book 'Get book from librarian'
 maxTimeHoldOrder = 12 #hours
 
+# only add book with this gap year
+max_year_publised = db.config.find_one({'_id': 'max_year_publised'})['value']
+
 # book dates much return
 # maxDateBorrow = 4
 maxDateBorrow = db.config.find_one({'_id': 'max_date_borrowed'})['value']

@@ -85,7 +85,7 @@ class SetAccountRole(Resource):
 						'old_role': account['role'],
 						'new_role': json['role']
 					}
-					db.logging.insert_one(formatLog(token, 'change role', note))
+					db.log.insert_one(formatLog(token, 'change role', note))
 
 		except Exception as e:
 			logging.info('error setAccountRole: %s', e)

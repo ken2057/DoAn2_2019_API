@@ -36,7 +36,7 @@ except Exception as e:
 
 # Author
 try:
-	db.bookTitle.insert_many([
+	db.book.insert_many([
 		{
 			'_id': 1,
 			'name': 'Hello world',
@@ -131,7 +131,7 @@ except Exception as e:
 # log
 # create temp log collection
 try:
-	db.logging.insert_one({'deleted': True})
+	db.log.insert_one({'deleted': True})
 
 except Exception as e:
 	print(e)

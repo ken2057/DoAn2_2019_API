@@ -94,7 +94,7 @@ def getBorrowedWithId(borrowedId):
 
 ## Get book with id
 def getBookWithId(bookId):
-	return db.bookTitle.find_one({'_id':bookId, 'deleted': False})
+	return db.book.find_one({'_id':bookId, 'deleted': False})
 
 # ------------------------------------------------------------------------------
 # formating

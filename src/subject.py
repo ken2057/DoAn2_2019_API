@@ -40,19 +40,19 @@ class Subjects(Resource):
 						d = db.subject.delete_one({'_id': json['subjectName']})
 
 						# delete subject in book
-						books = db.bookTitle.find({'subjects': {'$elemMatch': {'$eq': json['subjectName']}}})
+						books = db.book.find({'subjects': {'$elemMatch': {'$eq': json['subjectName']}}})
 						list_books = []
 						for b in books:
 							list_books.append(b['_id'])
 							b['subjects'].remove(json['subjectName'])
-							d = db.bookTitle.update_one({'_id': b['_id']}, { '$set': {'subjects': b['subjects']}}, session=s)
+							d = db.book.update_one({'_id': b['_id']}, { '$set': {'subjects': b['subjects']}}, session=s)
 
 						# add log
 						note = {
 							'subject': json['subjectName'],
-							'affect_books': list_books
+							'books_affected': list_books
 						}
-						db.logging.insert_one(formatLog(token, 'delete subject', note))
+						db.log.insert_one(formatLog(token, 'delete subject', note))
 
 					# add or edit subject
 					if json['action'] == 'add':
@@ -63,24 +63,24 @@ class Subjects(Resource):
 						note = {
 							'subject': json['subjectName']
 						}
-						db.logging.insert_one(formatLog(token, 'add subject', note))
+						db.log.insert_one(formatLog(token, 'add subject', note))
 					elif json['action'] == 'edit':
 						# update subject
 						d = db.subject.delete_one({'_id': json['oldSubject']}, session=s)
 						i = db.subject.insert_one({'_id': json['subjectName']}, session=s)
 						
 						# change subject in book
-						books = db.bookTitle.find({'subjects': {'$elemMatch': {'$eq': json['oldSubject']}}})
+						books = db.book.find({'subjects': {'$elemMatch': {'$eq': json['oldSubject']}}})
 						for b in books:
 							b['subjects'][b['subjects'].index(json['oldSubject'])] = json['subjectName']
-							u = db.bookTitle.update_one({'_id': b['_id']}, { '$set': {'subjects': b['subjects']}}, session=s)
+							u = db.book.update_one({'_id': b['_id']}, { '$set': {'subjects': b['subjects']}}, session=s)
 
 						# add log
 						note = {
 							'oldSubject': json['oldSubject'],
 							'newSubject': json['subjectName'],
 						}
-						db.logging.insert_one(formatLog(token, 'edit subject', note))
+						db.log.insert_one(formatLog(token, 'edit subject', note))
 						
 			return 'done', 200
 			

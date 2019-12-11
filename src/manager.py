@@ -2,7 +2,7 @@
 from src.package import *
 import json
 # -----------------------------------------------------------------------------
-from src.configs import role, limitFindBorrowed, roleHigherThanUser
+from src.configs import role, limitFindBorrowed, roleHigherThanUser, max_year_publised
 from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSeria, getBookWithId, formatLog
 # -----------------------------------------------------------------------------
 
@@ -59,8 +59,8 @@ class EditBook(Resource):
 			# update
 			with client.start_session() as s:
 				with s.start_transaction():
-					d = db.bookTitle.delete_one({'_id': bookNew['isbn']}, session=s)
-					i = db.bookTitle.insert_one({
+					d = db.book.delete_one({'_id': bookNew['isbn']}, session=s)
+					i = db.book.insert_one({
 						'_id': bookNew['isbn'],
 						'name': bookNew['name'],
 						'author': bookNew['author'],
@@ -97,7 +97,7 @@ class DeleteBook(Resource):
 			# update book
 			with client.start_session() as s:
 				with s.start_transaction():
-					u = db.bookTitle.update_one({'_id': book['_id']}, { '$set': { 'deleted': True }}, session=s)
+					u = db.book.update_one({'_id': book['_id']}, { '$set': { 'deleted': True }}, session=s)
 					log = formatLog(token, 'delete book', 'bookId: ' + str(book['_id']))
 					i = db.log.insert_one(log, session=s)
 			return 'done', 200
@@ -204,12 +204,17 @@ class AddBook(Resource):
 				return 'Unauthorized', 401
 
 			book = json['book']
-			book['_id'] = db.bookTitle.find().count() + 1
+
+			# check year released of book
+			if(datetime.now().year - int(book['year_released']) <= max_year_publised):
+				return 'This book too old', 400
+
+			book['_id'] = db.book.find().count() + 1
 			book.pop('isbn')
 			
 			with client.start_session() as s:
 				with s.start_transaction():
-					i = db.bookTitle.insert_one(book)
+					i = db.book.insert_one(book, session=s)
 					i = db.log.insert_one(formatLog(token, 'add book', {'bookId':book['_id']}), session=s)
 
 			return 'done', 200
@@ -237,4 +242,80 @@ class Configs(Resource):
 
 		except Exception as e:
 			logging.info('error getConfig: %s', e)
+		return 'Invalid', 400
+	def post(self):
+		try:
+			# json = {'token',
+			# 	configs: { 
+					# 'min_age', 'max_age', 
+					# 'max_month_account_expire', 
+					# 'max_year_publised', 'max_book_borrow', 
+					# 'max_date_borrowed' 
+			#	}
+			# }
+			json = request.get_json()['json']
+			token = getToken(json['token'])
+			# check permission
+			if token == None or token['role'] not in roleHigherThanUser:
+				return 'Unauthorized', 401
+			#
+			configs = json['configs']
+			list_update = {}
+			# check age valid
+			min_age = int(configs['min_age'])
+			max_age = int(configs['max_age'])
+			if (min_age > 0 and max_age > 0 and min_age >= max_age):
+				return 'Invalid min/max age', 400
+			else:
+				list_update['min_age'] = min_age
+				list_update['max_age'] = max_age
+			# check value of other varible 
+			max_month_account_expire = int(configs['max_month_account_expire'])
+			max_year_publised = int(configs['max_year_publised'])
+			max_book_borrow = int(configs['max_book_borrow'])
+			max_date_borrowed = int(configs['max_date_borrowed'])
+			#
+			if(max_month_account_expire <= 0):
+				return 'Invalid account invalid date', 400
+			else:
+				list_update['max_month_account_expire'] = max_month_account_expire
+			#
+			if(max_year_publised <= 0):
+				return 'Invalid max publish year', 400
+			else:
+				list_update['max_year_publised'] = max_year_publised
+			#
+			if(max_book_borrow <= 0):
+				return 'Invalid max publish year', 400
+			else:
+				list_update['max_book_borrow'] = max_book_borrow
+			#
+			if(max_date_borrowed <= 0):
+				return 'Invalid max publish year', 400
+			else:
+				list_update['max_date_borrowed'] = max_date_borrowed
+			
+			# get old configs to save to log
+			oldConfigs = []
+			for c in db.config.find():
+				# when value not changed
+				if list_update[c['_id']] == c['value']:
+					list_update.pop(c['_id'])
+				else: 
+					oldConfigs.append({'name': c['_id'], 'old': c['value'], 'new': list_update[c['_id']]})
+			
+			# when nothing changed
+			if(len(list_update) == 0):
+				return 'done', 200
+
+			# update
+			with client.start_session() as s:
+				with s.start_transaction():
+					for key in list_update:
+						u = db.config.update_one({'_id': key}, {'$set': {'value': list_update[key]}}, session=s)
+					db.log.insert_one(formatLog(token, 'edit config', oldConfigs), session=s)
+			
+			return 'done', 200
+		except Exception as e:
+			logging.info('error postConfigs: %s', e)
 		return 'Invalid', 400
