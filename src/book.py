@@ -4,7 +4,7 @@ from copy import copy
 import re
 # ------------------------------------------------------------------------------
 from src.configs import limitBooks, statusBorrow, statusBorrow_block, minAccountPoint
-from src.configs import maximumBookCanBorrow, maxTimeHoldOrder, userPoint
+from src.configs import maximumBookCanBorrow, maxTimeHoldOrder, userPoint, roleHigherThanUser
 from src.utils import isJsonValid, getToken, calcBorrowExpireTime, calcDateExpire
 from src.utils import getAccountWithId, getBookWithId, formatDate, formatHistoryStatus
 # ------------------------------------------------------------------------------
@@ -160,23 +160,40 @@ class BorrowBook(Resource):
 		try:
 			# json will have bookId
 			json = request.get_json()['json']
+
 			token = getToken(json['token'])
 			if token == None:
 				return 'Unauthorized', 401
 
-			# get account, book from db
-			account = getAccountWithId(token['username'])
+			# check is admin/manager add new borrow info for customer
+			if ('add' in json and token['role'] in roleHigherThanUser):
+				# if 'add' in json => that mean admin/manager add borrow book for user
+				account = getAccountWithId(json['username'])
+				if (account == None):
+					return 'Username not exist', 400
+			else:	
+				# get account, book from db
+				account = getAccountWithId(token['username'])
+
 			book = getBookWithId(int(json['bookId']))
+
 			# if user already borrow this book, he/she can't borrow the second
-			
-			if token['username'] in [x.split('-')[0] for x in book['books'] if x != '']:
+			if account['_id'] in [x.split('-')[0] for x in book['books'] if x != '']:
 				return "Can't borrow 2 same book", 400
+			# check user maximium book borrow
+			totalBookOnBorrow = [x for x in account['borrowed'] if x['status'] in statusBorrow_block]
+			if maximumBookCanBorrow <= len(totalBookOnBorrow):
+				return 'Account have borrowed maximum books can borrow', 400
 			# if book not avaiable
 			if '' not in book['books']:
 				return 'Out of order', 400
 			# check date expire
-			if 'date_expire' in account and (account['date_expire'] - datetime.now()).days < 0:
-				return 'Your account have been expired', 400
+			# if 'date_expire' in account and (account['date_expire'] - datetime.now()).days < 0:
+			# 	return 'Your account have been expired', 400
+			if 'date_created' in account:
+				expireDate = calcBorrowExpireTime(account['date_created'])
+				if (expireDate - datetime.now()).days < 0:
+					return 'Account have been expired', 400
 			# check userpoint
 			if 'account_point' in account and account['account_point'] <= minAccountPoint:
 				return 'Your account have been blocked', 400
@@ -186,8 +203,8 @@ class BorrowBook(Resource):
 			now = formatDate(datetime.now() + timedelta(hours=7))
 
 			borrowInfo = {
-				'_id': token['username'] + '-' + json['bookId'] + '-' + now.__str__(),
-				'username': token['username'],
+				'_id': account['_id'] + '-' + json['bookId'] + '-' + now.__str__(),
+				'username': account['_id'],
 				'bookId': int(json['bookId']),
 				'status': statusBorrow['wait_to_get'],
 				'date_borrow': now,
@@ -215,13 +232,13 @@ class BorrowBook(Resource):
 						session=s
 					)
 					u = db.account.update_one(
-						{'_id': token['username']},
+						{'_id': account['_id']},
 						{'$set': {'borrowed': account['borrowed']}},
 						session=s
 					)
 					i = db.borrowed.insert_one(borrowInfo, session=s)
 
-			return 'done', 200
+			return {'borrowId': borrowInfo['_id']}, 200
 
 		except Exception as e:
 			logging.info('error post orderBook: %s', e)

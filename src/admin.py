@@ -2,7 +2,7 @@ import re
 # all the same import of api will be here
 from src.package import *
 # -----------------------------------------------------------------------------
-from src.configs import role
+from src.configs import role, roleHigherThanUser
 from src.utils import isJsonValid, getToken, getAccountWithId, convertDateForSeria, formatDate
 from src.utils import formatLog
 # -----------------------------------------------------------------------------
@@ -18,7 +18,7 @@ class GetUsersInfo(Resource):
 				search['_id'] = re.compile(username, re.IGNORECASE)
 
 			# token expired or not admin
-			if token == None or token['role'] != role[0]:
+			if token == None or token['role'] not in roleHigherThanUser:
 				return 'Unauthorized', 401
 			# get all user info
 			users = []

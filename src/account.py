@@ -2,9 +2,9 @@
 from src.package import *
 from uuid import uuid4
 # -----------------------------------------------------------------------------
-from src.configs import tokenExpireTime, role, maxDateAccount, minAge, maxAge
+from src.configs import tokenExpireTime, role, maxDateAccount, minAge, maxAge, roleHigherThanUser
 from src.utils import calcTokenExprieTime, getAccountWithId, getToken, convertDateForSeria, getTokenWithUser
-from src.utils import formatDate, calcDateExpire, formatLog
+from src.utils import formatDate, calcDateExpire, formatLog, calcBorrowExpireTime
 # -----------------------------------------------------------------------------
 
 ## Login and return token
@@ -32,23 +32,30 @@ class Login(Resource):
 			ip = request.headers.get('X-Forwarded-For')
 
 			account = self.findUser(username, password)
-			if account != None:
-				# if user have been blocked by admin or manager
-				# can't login
-				if 'blocked' in account and account['blocked']:
-					return 'Your account have been blocked', 403
+			if account == None:
+				return 'Wrong username/password', 401
 
-				# get old token if exist
-				result = getTokenWithUser(username)
-				if result != None:
-					# check valid IP
-					# if(result['ip'] != ip):
-					#	return 'Already logged in', 409
-					token = result['_id']
-				else:
-					token = self.createToken(account, ip)
-				return { 'token': token, 'expires': tokenExpireTime }, 200
-			return 'Wrong username/password', 401
+			# if user have been blocked by admin or manager
+			# can't login
+			if 'blocked' in account and account['blocked']:
+				return 'Your account have been blocked', 403
+			# if account expired => can't login
+			if 'date_created' in account:
+				expireDate = calcBorrowExpireTime(account['date_created'])
+				if (expireDate - datetime.now()).days < 0:
+					return 'Account have been expired', 403
+
+			# get old token if exist
+			result = getTokenWithUser(username)
+			if result != None:
+				# check valid IP
+				# if(result['ip'] != ip):
+				#	return 'Already logged in', 409
+				token = result['_id']
+			else:
+				token = self.createToken(account, ip)
+			return { 'token': token, 'expires': tokenExpireTime }, 200
+			
 			
 		except Exception as e:
 			logging.info('error login: %s',e)
@@ -93,7 +100,7 @@ class SignUp(Resource):
 							'account_point': 0,
 							'date_created': formatDate(datetime.now()),
 							# based on the requirement, account only work for 6 months
-							'date_expire': formatDate(calcDateExpire(maxDateAccount*24)[0]),
+							# 'date_expire': formatDate(calcDateExpire(maxDateAccount*24)[0]),
 							'active': False,
 							'blocked': False
 						}, session = s
@@ -162,7 +169,7 @@ class AccountInfo(Resource):
 			
 			# if not match username in token and user in
 			# or token is a admin
-			if user['username'] != token['username'] and token['role'] != 'admin':
+			if user['username'] != token['username'] and token['role'] not in roleHigherThanUser:
 				return 'Json and token username not match', 407
 
 			# set
@@ -192,7 +199,7 @@ class AccountInfo(Resource):
 							'old_role': account['role'],
 							'new_role': user['role']
 						}
-						i = db.log.insert_one(formatLog(token, 'change role', note), session)
+						i = db.log.insert_one(formatLog(token, 'change role', note), session=s)
 			return 'done', 200
 		except Exception as e:
 			logging.info('error postAccountinfo: %s', e)
