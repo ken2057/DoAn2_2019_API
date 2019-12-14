@@ -206,8 +206,11 @@ class AddBook(Resource):
 			book = json['book']
 
 			# check year released of book
-			if(datetime.now().year - int(book['year_released']) <= max_year_publised):
+			if(datetime.now().year - int(book['year_released']) > max_year_publised):
 				return 'This book too old', 400
+
+			if (db.author.find_one({'name': book['author']}) == None):
+				return 'Author not exist', 400
 
 			book['_id'] = db.book.find().count() + 1
 			book.pop('isbn')

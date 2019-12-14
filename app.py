@@ -11,6 +11,7 @@ from src.account import Login, SignUp, GetUserBorrowed, AccountInfo
 from src.subject import Subjects
 from src.borrowed import Borrowed, GetSearchBorrowed, UpdateBorrowed, PayFee
 from src.author import GetAuthor
+from src.report import RpExpireBorrowed, RpSubjectBorrowed
 # ------------------------------------------------------------------------------
 app = Flask(__name__)
 # for develop
@@ -67,6 +68,10 @@ api.add_resource(PayFee, "/PayFee") # post
 
 # author
 api.add_resource(GetAuthor, "/Author") # get
+
+# report
+api.add_resource(RpExpireBorrowed, "/Report/ExpireBorrowed") # get
+api.add_resource(RpSubjectBorrowed, "/Report/SubjectBorrowed") # get
 
 if __name__ == "__main__":
   app.run()
